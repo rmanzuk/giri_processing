@@ -1,4 +1,4 @@
-function [innercells,outercells] = addtracing(startNum,endNum,existingInners,existingOuters)
+function [innercells,outercells] = addtracing(imageDirectory,startNum,endNum,existingInners,existingOuters)
 % This function lets you create archeo trace data using ginput,
 % for a single archeo. 
 % It will loop through a set of photos and ask you to input inner and
@@ -8,6 +8,9 @@ function [innercells,outercells] = addtracing(startNum,endNum,existingInners,exi
 % your images in .tif format. 
 % 
 % IN
+% imageDirectory: fullfile directory with the folder where the images are
+% stored and their extension. example; imageDirectory = 
+% dir(fullfile('/Users/Nishant/Desktop/PEI/radius/', '*.tif'));
 % startNum: what image # you want to start at. Eg if you only wanna
 % input tracing data for a subset of the images in your stack
 % endNum: what image # in your stack you want to end at. 
@@ -47,20 +50,23 @@ function [innercells,outercells] = addtracing(startNum,endNum,existingInners,exi
 
 
 % CHANGE THIS to point to the folder containing your images
-filenames = dir(fullfile('/Users/Nishant/Desktop/PEI/radius/', '*.tif'));
-fulln=length(filenames);
+%filenames = dir(fullfile('/Users/Nishant/Desktop/PEI/radius/', '*.tif'));
+fulln=length(imageDirectory);
 
 
 % throws error if number of inputs isn't 2 or 4
-if nargin ~= 2 && nargin ~= 4
+if nargin ~= 3 && nargin ~= 5
   error('number of inputs must be 2 or 4')
 end
 
 % makes sure that the tracings are added to existing data rather than
 % entirely replacing it
-if nargin == 4
+if nargin == 5
     inners=existingInners;
     outers=existingOuters;
+else
+    inners=cell(1,endNum);
+    outers=cell(1,endNum);
 end
 
 % error messages to ensure that startNum ? endNum ? total no. of images
@@ -72,23 +78,59 @@ if endNum > fulln
 end
 
 % goes through each image in range, and uses ginput to get inners + outers
+count = 0;
 for i=startNum:endNum
+    count = count+1;
     
-    workingimage=imread(filenames(i).name);
+    workingimage=imread(fullfile(imageDirectory(i).folder,imageDirectory(i).name));
     
-    imshow(workingimage,'InitialMagnification',200); 
+    imshow(workingimage,'InitialMagnification',400);
+    hold on
+    if i>1  && ~isempty(inners{i-1})
+        plot(inners{i-1}(:,1),inners{i-1}(:,2),'-o')
+    else
+        % do nothing
+    end
     title("inner for image #" + (i) + " (" + (i-startNum+1) + " of " + (endNum-startNum+1) + " for this tracing)"); 
-    [x,y,button] = ginput;
-    if size(x)>0
-        inners{i}=[x y button];
+    n=0;
+    while true
+        [x_i,y_i,button_i] = ginput(1);
+        if isempty(x_i) ; break; end
+        n = n+1;
+        x(n) = x_i(1);
+        y(n) = y_i(1);
+        button(n) = button_i(1);
+        plot(x,y,'r')
+        drawnow
+    end
+    
+    if exist('x')
+        inners{i}=[x' y' button'];
     end
     clear x y button
+    hold off
     
-    imshow(workingimage,'InitialMagnification',200); 
+    imshow(workingimage,'InitialMagnification',400); 
+    hold on
+    if i>1 && ~isempty(outers{i-1})
+        plot(outers{i-1}(:,1),outers{i-1}(:,2),'-o')
+    else
+        % do nothing
+    end
     title("outer for image #" + (i) + " (" + (i-startNum+1) + " of " + (endNum-startNum+1) + " for this tracing)"); 
-    [x,y,button] = ginput;
-    if size(x)>0
-        outers{i}=[x y button];
+    n=0;
+    while true
+        [x_i,y_i,button_i] = ginput(1);
+        if isempty(x_i) ; break; end
+        n = n+1;
+        x(n) = x_i(1);
+        y(n) = y_i(1);
+        button(n) = button_i(1);
+        plot(x,y,'r')
+        drawnow
+    end
+    if exist('x')
+        outers{i}=[x' y' button'];
     end
     clear x y button
 
