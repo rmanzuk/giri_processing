@@ -31,6 +31,8 @@ function [branched_flags,branching_angles] = process_branched_network(inners,out
 % branching angle between the two archaeos as opposed to the branch point
 % slice number.
 
+% R. A. Manzuk 07/18/2020
+
     %% begin dat sweet function
     % how many slices are we working with?
     n_slices = max([cellfun(@numel,inners),cellfun(@numel,outers)],[],'all');
