@@ -1,4 +1,4 @@
-function [inner_3d_rotated, outer_3d_rotated] = rotate_clicked_data3d(inners, outers, block_top_sd, strike_im_heading, bedding_sd, scale_ratio)
+function [inner_3d_rotated, outer_3d_rotated] = rotate_clicked_data3d(inners, outers, block_top_sd, strike_im_heading, bedding_sd, scale_ratio,plt)
 % This function takes inner and outer clicked data for archaeo branches
 % from a GIRI image stack (could be used for other 3D data), along with
 % orientation information about the block and field site to rotate the data
@@ -27,6 +27,9 @@ function [inner_3d_rotated, outer_3d_rotated] = rotate_clicked_data3d(inners, ou
 % scale_ratio: ratio of vertical image separation to pixel-width. For
 % example if images are separated by 100 microns and pixels are 20 microns,
 % this input is 5.
+%
+% plt: logical flag if the user would like the 3D rotated data plotted at
+% the completion of rotation. 1 for plot, 0 for don't plot
 % 
 % OUT
 % inner_3d_rotated: 1xn_archaeo cell array where each cell contains the 3D
@@ -104,6 +107,16 @@ function [inner_3d_rotated, outer_3d_rotated] = rotate_clicked_data3d(inners, ou
         final_mat = [rotated4',current_points(:,3)];
         outer_3d_rotated{i} = final_mat;
     end
+
+if plt
+    for i = 1:numel(outer_3d_rotated)
+        plot3(outer_3d_rotated{i}(:,1),outer_3d_rotated{i}(:,2),outer_3d_rotated{i}(:,3),'b')
+        hold on
+        plot3(inner_3d_rotated{i}(:,1),inner_3d_rotated{i}(:,2),inner_3d_rotated{i}(:,3),'r')
+    end
+else
+    % do nothing
+end
 
 end
 

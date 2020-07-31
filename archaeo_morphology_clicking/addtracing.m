@@ -64,6 +64,13 @@ end
 if nargin == 5
     inners=existingInners;
     outers=existingOuters;
+    if startNum > numel(inners)
+        add_empty = cell(1,endNum - numel(inners));
+        inners(numel(inners)+1:endNum) = add_empty;
+        outers(numel(outers)+1:endNum) = add_empty;
+    else
+        %do nothing
+    end
 else
     inners=cell(1,endNum);
     outers=cell(1,endNum);
@@ -87,7 +94,7 @@ for i=startNum:endNum
     imshow(workingimage,'InitialMagnification',400);
     hold on
     if i>1  && ~isempty(inners{i-1})
-        plot(inners{i-1}(:,1),inners{i-1}(:,2),'-o')
+        plot(inners{i-1}(:,1),inners{i-1}(:,2),':')
     else
         % do nothing
     end
@@ -113,7 +120,7 @@ for i=startNum:endNum
     imshow(workingimage,'InitialMagnification',400); 
     hold on
     if i>1 && ~isempty(outers{i-1})
-        plot(outers{i-1}(:,1),outers{i-1}(:,2),'-o')
+        plot(outers{i-1}(:,1),outers{i-1}(:,2),':')
     else
         % do nothing
     end
