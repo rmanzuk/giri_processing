@@ -1,4 +1,4 @@
-function [] = visualize_clicking(outers,imDir,pause_time)
+function [] = visualize_clicking(outers,imDir,pause_time,startNum,endNum)
 % This function goes through the clicking stack and outlines and labels the
 % archaeos that are a part of the input 'outer' data. It should help see
 % what has already been traced and target future branches for tracing
@@ -13,6 +13,9 @@ function [] = visualize_clicking(outers,imDir,pause_time)
 % pause_time: approximate number of seconds you would like to pause on each
 % frame to help slow down and get a better look. Somewhere around 0.2 seems
 % to work well.
+% startNum: what image # you want to start at. Eg if you only wanna
+% view tracing data for a subset of the images in your stack
+% endNum: what image # in your stack you want to end at. 
 %
 % OUT
 %
@@ -33,7 +36,7 @@ function [] = visualize_clicking(outers,imDir,pause_time)
 
     n_archaeos = numel(outers);
 
-    for i = 1:n_slices
+    for i = startNum:endNum
         this_im = imread(fullfile(imDir(i).folder,imDir(i).name));
         slice_outers = {};
         for j = 1:n_archaeos
