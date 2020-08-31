@@ -1,6 +1,6 @@
 function [inner_3d,outer_3d] = make_clicking_3d(inners,outers,scale_ratio,plt)
-% This function just takes the data from clicking and puts it into 3d space
-% for later processing. The point cloud is not densified or altered in any
+% This function just takes the data from clicking (dense slices or not) and puts it into 3d space
+% for later processing. The point cloud is not further densified or altered in any
 % way
 
 % IN

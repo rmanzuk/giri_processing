@@ -5,11 +5,11 @@ function [inner_3d_rotated, outer_3d_rotated] = rotate_clicked_data3d(inners, ou
 % into paleo-gravitational orientation. 
 %
 % IN
-% inners: 1xn_archaeos cell array containing the densified outputs for
-% inner clicked data from the densify_clicked_points function.
+% inners: 1xn_archaeos cell array containing the densified or non-densified 3d outputs for
+% inner clicked data from the densify_3d or make_clicking_3d functions.
 %
-% outers: 1xn_archaeos cell array containing the densified outputs for
-% outer clicked data from the densify_clicked_points function.
+% outers: 1xn_archaeos cell array containing the densified or non-densified 3d outputs for
+% outer clicked data from the densify_3d or make_clicking_3d functions.
 %
 % block_top_sd: 1x2 array containing stike-dip orientation information for
 % the top surface of the block or image plane [strike, dip].
