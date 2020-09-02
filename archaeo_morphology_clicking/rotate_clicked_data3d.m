@@ -59,8 +59,6 @@ function [inner_3d_rotated, outer_3d_rotated] = rotate_clicked_data3d(inners, ou
     for i = 1:numel(inners)
         % extract 3d dense data for this archaeo
         current_points = inners{i};
-        % account for ginput weirdness
-        current_points(:,2) = current_points(:,2).*-1;
         % and do all the rotations
         rotated1 = z_rot_mat * [current_points(:,1),current_points(:,2),current_points(:,3)]';
         rotated2 = y_rot_mat * rotated1;
@@ -74,7 +72,6 @@ function [inner_3d_rotated, outer_3d_rotated] = rotate_clicked_data3d(inners, ou
     outer_3d_rotated = {};
     for i = 1:numel(outers)
         current_points = outers{i};
-        current_points(:,2) = current_points(:,2).*-1;
         % all the rotations
         rotated1 = z_rot_mat * [current_points(:,1),current_points(:,2),current_points(:,3)]';
         rotated2 = y_rot_mat * rotated1;
