@@ -1,6 +1,7 @@
-function [] = visualize_clicking(outers,imDir,pause_time,startNum,endNum)
+function [] = visualize_clicking(outers,imDir)
 % This function goes through the clicking stack and outlines and labels the
-% archaeos that are a part of the input 'outer' data. It should help see
+% archaeos that are a part of the input 'outer' data. The user then 
+% clicks through the stack with a slider. It should help see
 % what has already been traced and target future branches for tracing
 % 
 % IN
@@ -35,8 +36,21 @@ function [] = visualize_clicking(outers,imDir,pause_time,startNum,endNum)
     end
 
     n_archaeos = numel(outers);
+    slide_step = 1/(n_slices-1);
+    
+    f = figure('Visible','off');
+    c = uicontrol(f,'Style','slider');
+    c.Min = 1;
+    c.Max = n_slices;
+    c.Value = 1;
+    c.SliderStep = [slide_step slide_step];
+    c.Position = [270 10 60 20];
+    c.Callback = @selection;
+    f.Visible='on';
 
-    for i = startNum:endNum
+    function selection(src,event)
+        val = c.Value;
+        i = round(val);
         this_im = imread(fullfile(imDir(i).folder,imDir(i).name));
         slice_outers = {};
         for j = 1:n_archaeos
@@ -59,8 +73,6 @@ function [] = visualize_clicking(outers,imDir,pause_time,startNum,endNum)
                 % do nothing
             end
         end
-        drawnow
-        pause(pause_time)
-        hold off
+    drawnow
     end
 end
