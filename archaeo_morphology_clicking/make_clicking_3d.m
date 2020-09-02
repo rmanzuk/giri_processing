@@ -2,7 +2,7 @@ function [inner_3d,outer_3d] = make_clicking_3d(inners,outers,scale_ratio,plt)
 % This function just takes the data from clicking (dense slices or not) and puts it into 3d space
 % for later processing. The point cloud is not further densified or altered in any
 % way
-
+%
 % IN
 % inners: 1xn_archaeos cell array containing the cell arrays for inner circles 
 % created during data collection. To set this variable up, I just call 
@@ -25,7 +25,7 @@ function [inner_3d,outer_3d] = make_clicking_3d(inners,outers,scale_ratio,plt)
 % coordinates for all inner clicked points for a given archaeo . The fourth
 % column in the cell is the button data, which may be useful later
 %
-% outer_3d_rotated: 1xn_archaeo cell array where each cell contains the 3D
+% outer_3d: 1xn_archaeo cell array where each cell contains the 3D
 % coordinates for all outer clicked points for a given archaeo. The fourth
 % column in the cell is the button data, which may be useful later
 %
@@ -47,8 +47,9 @@ function [inner_3d,outer_3d] = make_clicking_3d(inners,outers,scale_ratio,plt)
                 %do nothing
             end
         end
-        % then just reorder so button data is last column
-        inner_3d{i} = [current_points(:,1),current_points(:,2),current_points(:,4),current_points(:,3)];
+        % then just reorder so button data is last column, and account for
+        % ginput y -1
+        inner_3d{i} = [current_points(:,1),current_points(:,2).*-1,current_points(:,4),current_points(:,3)];
     end
     
     % and do the same thing for outers
@@ -67,8 +68,9 @@ function [inner_3d,outer_3d] = make_clicking_3d(inners,outers,scale_ratio,plt)
                 %do nothing
             end
         end
-        % then just reorder so button data is last column
-        outer_3d{i} = [current_points(:,1),current_points(:,2),current_points(:,4),current_points(:,3)];
+        % then just reorder so button data is last column, and account for
+        % ginput y -1
+        outer_3d{i} = [current_points(:,1),current_points(:,2).*-1,current_points(:,4),current_points(:,3)];
     end
     
     
