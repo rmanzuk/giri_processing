@@ -95,11 +95,16 @@ function[inner_center_stats,outer_center_stats] = center_line_analysis(inner_3d,
             % first, rotation matrix for spin around z axis such that the
             % derivative is facing north.
             z_rot_deg = atand(derivative_eval(j,1)/derivative_eval(j,2));
+            if z_rot_deg < 0
+                z_rot_deg = z_rot_deg +180;
+            else
+            end
+            z_rot_deg = -1* z_rot_deg;
             z_rot_mat = [cosd(z_rot_deg), -sind(z_rot_deg), 0;
             sind(z_rot_deg), cosd(z_rot_deg), 0; 0, 0, 1];
             % then rotation matrix to account for dip (y axis) around
-            y_rot_mat = [cosd(inclinations(j)-90), 0, sind(inclinations(j)-90);
-            0, 1, 0; -sind(inclinations(j)-90), 0, cosd(inclinations(j)-90)];
+            y_rot_mat = [cosd(90-inclinations(j)), 0, -sind(90-inclinations(j));
+            0, 1, 0; sind(90-inclinations(j)), 0, cosd(90-inclinations(j))];
             % rotate it!
             rotated_1 = z_rot_mat * new_archaeo_cloud';
             rotated_2 = (y_rot_mat * rotated_1)';
@@ -176,11 +181,16 @@ function[inner_center_stats,outer_center_stats] = center_line_analysis(inner_3d,
             % first, rotation matrix for spin around z axis such that the
             % derivative is facing north.
             z_rot_deg = atand(derivative_eval(j,1)/derivative_eval(j,2));
-            z_rot_mat = [cosd(z_rot_deg), -sind(z_rot_deg), 0;
-            sind(z_rot_deg), cosd(z_rot_deg), 0; 0, 0, 1];
+            if z_rot_deg < 0
+                z_rot_deg = z_rot_deg +180;
+            else
+            end
+            z_rot_deg = -1* z_rot_deg;
+            z_rot_mat = [cosd(z_rot_deg), sind(z_rot_deg), 0;
+            -sind(z_rot_deg), cosd(z_rot_deg), 0; 0, 0, 1];
             % then rotation matrix to account for dip (y axis) around
-            y_rot_mat = [cosd(inclinations(j)-90), 0, sind(inclinations(j)-90);
-            0, 1, 0; -sind(inclinations(j)-90), 0, cosd(inclinations(j)-90)];
+            y_rot_mat = [cosd(90-inclinations(j)), 0, sind(90-inclinations(j));
+            0, 1, 0; -sind(90-inclinations(j)), 0, cosd(90-inclinations(j))];
             % rotate it!
             rotated_1 = z_rot_mat * new_archaeo_cloud';
             rotated_2 = (y_rot_mat * rotated_1)';
