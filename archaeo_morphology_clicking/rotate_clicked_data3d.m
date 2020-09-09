@@ -64,7 +64,11 @@ function [inner_3d_rotated, outer_3d_rotated] = rotate_clicked_data3d(inners, ou
         rotated2 = y_rot_mat * rotated1;
         rotated3 = z_rot_mat2 * rotated2;
         rotated4 = y_rot_mat2 * rotated3;
-        final_mat = [rotated4',current_points(:,4)];
+        if size(current_points,2) == 4
+            final_mat = [rotated4',current_points(:,4)];
+        else
+            final_mat = rotated4';
+        end
         inner_3d_rotated{i} = final_mat;
     end
 
@@ -77,7 +81,11 @@ function [inner_3d_rotated, outer_3d_rotated] = rotate_clicked_data3d(inners, ou
         rotated2 = y_rot_mat * rotated1;
         rotated3 = z_rot_mat2 * rotated2;
         rotated4 = y_rot_mat2 * rotated3;
-        final_mat = [rotated4',current_points(:,4)];
+        if size(current_points,2) == 4
+            final_mat = [rotated4',current_points(:,4)];
+        else
+            final_mat = rotated4';
+        end
         outer_3d_rotated{i} = final_mat;
     end
 
