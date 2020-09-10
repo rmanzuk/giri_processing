@@ -54,6 +54,7 @@ function[inner_center_stats,outer_center_stats] = center_line_analysis(inner_3d,
     inner_center_spline_points = {};
     inner_derivative_spline_points = {};
     inner_inclinations = {};
+    inner_declinations = {};
     inner_min_thicknesses = {};
     inner_max_thicknesses = {};
     inner_mean_thicknesses = {};
@@ -63,9 +64,6 @@ function[inner_center_stats,outer_center_stats] = center_line_analysis(inner_3d,
         % extract individual archaeo center line and get rid of nans
         xyz = inner_center_points{i}';
         xyz = xyz(:,all(~isnan(xyz)));
-        [~,sorting_index] = sort(xyz(3,:));
-        xyz = xyz(:,sorting_index);
-
         % assess center line arclength so we know how many samples to take of
         % its spline
         curve_length = arclength(xyz(1,:),xyz(2,:),xyz(3,:));
@@ -79,9 +77,12 @@ function[inner_center_stats,outer_center_stats] = center_line_analysis(inner_3d,
         center_line_eval = ppval(center_spline,to_eval)';
         derivative_eval = ppval(spline_derivative,to_eval)';
 
-        %turn derivative at each point into inclination
-        slope_run = sqrt(derivative_eval(:,1).^2 + derivative_eval(:,2).^2);
+        %turn derivative at each point into inclination and declination
+        [declinations,slope_run] = cart2pol(derivative_eval(:,1),derivative_eval(:,2));
         inclinations = atand(derivative_eval(:,3)./slope_run);
+        declinations = rad2deg(declinations);
+        declinations = -1.*(declinations - 90);
+        declinations(declinations <=0) = 360 + declinations(declinations <=0);
 
         % now based upon local curves, 
         min_thick = [];
@@ -92,22 +93,16 @@ function[inner_center_stats,outer_center_stats] = center_line_analysis(inner_3d,
             % make the centerline spline pointthe middle of the point cloud. 
             new_archaeo_cloud = inner_3d{i}(:,1:3) - center_line_eval(j,:);
             % rotate the cloud based on the local derivative
-            % first, rotation matrix for spin around z axis such that the
-            % derivative is facing north.
-            z_rot_deg = atand(derivative_eval(j,1)/derivative_eval(j,2));
-            if z_rot_deg < 0
-                z_rot_deg = z_rot_deg +180;
-            else
-            end
-            z_rot_deg = -1* z_rot_deg;
-            z_rot_mat = [cosd(z_rot_deg), -sind(z_rot_deg), 0;
-            sind(z_rot_deg), cosd(z_rot_deg), 0; 0, 0, 1];
-            % then rotation matrix to account for dip (y axis) around
-            y_rot_mat = [cosd(90-inclinations(j)), 0, -sind(90-inclinations(j));
-            0, 1, 0; sind(90-inclinations(j)), 0, cosd(90-inclinations(j))];
+            % first, rotation matrix for spin around z (using declination)axis such that the
+            % tangent is facing north.
+            z_rot_mat = [cosd(declinations(j)), -sind(declinations(j)), 0;
+            sind(declinations(j)), cosd(declinations(j)), 0; 0, 0, 1];
+            % then rotation matrix to account for inclinations
+            x_rot_mat = [1,0,0;0,cosd(90-inclinations(j)), -sind(90-inclinations(j));
+            0, sind(90-inclinations(j)), cosd(90-inclinations(j))];
             % rotate it!
             rotated_1 = z_rot_mat * new_archaeo_cloud';
-            rotated_2 = (y_rot_mat * rotated_1)';
+            rotated_2 = (x_rot_mat * rotated_1)';
             % take the points above and below the proper z values
             points_in_window = rotated_2(:,3) < thickness_sampling & rotated_2(:,3) > -thickness_sampling;
             if sum(points_in_window) >= 10
@@ -118,7 +113,7 @@ function[inner_center_stats,outer_center_stats] = center_line_analysis(inner_3d,
                 min_thick(j) = min(distances, [],'all');
                 max_thick(j) = max(distances, [],'all');
                 mean_thick(j) = mean(distances,'all');
-                center_points(j,:) = (-z_rot_mat*(-y_rot_mat*[centroid,0]'))' + center_line_eval(j,:);
+                center_points(j,:) = (-z_rot_mat*(-x_rot_mat*[centroid,0]'))' + center_line_eval(j,:);
             else
                 % if you don't have enough points, don't try to do anything
                 min_thick(j) = NaN;
@@ -131,6 +126,7 @@ function[inner_center_stats,outer_center_stats] = center_line_analysis(inner_3d,
         inner_center_spline_points{i} = center_line_eval;
         inner_derivative_spline_points{i} = derivative_eval;
         inner_inclinations{i} = inclinations;
+        inner_declinations{i} = declinations;
         inner_min_thicknesses{i} = min_thick;
         inner_max_thicknesses{i} = max_thick;
         inner_mean_thicknesses{i} = mean_thick;
@@ -149,9 +145,6 @@ function[inner_center_stats,outer_center_stats] = center_line_analysis(inner_3d,
         % extract individual archaeo center line and get rid of nans
         xyz = outer_center_points{i}';
         xyz = xyz(:,all(~isnan(xyz)));
-        [~,sorting_index] = sort(xyz(3,:));
-        xyz = xyz(:,sorting_index);
-
         % assess center line arclength so we know how many samples to take of
         % its spline
         curve_length = arclength(xyz(1,:),xyz(2,:),xyz(3,:));
@@ -165,9 +158,12 @@ function[inner_center_stats,outer_center_stats] = center_line_analysis(inner_3d,
         center_line_eval = ppval(center_spline,to_eval)';
         derivative_eval = ppval(spline_derivative,to_eval)';
 
-        %turn derivative at each point into inclination
-        slope_run = sqrt(derivative_eval(:,1).^2 + derivative_eval(:,2).^2);
+        %turn derivative at each point into inclination and declination
+        [declinations,slope_run] = cart2pol(derivative_eval(:,1),derivative_eval(:,2));
         inclinations = atand(derivative_eval(:,3)./slope_run);
+        declinations = rad2deg(declinations);
+        declinations = -1.*(declinations - 90);
+        declinations(declinations <=0) = 360 + declinations(declinations <=0);
 
         % now based upon local curves, 
         min_thick = [];
@@ -180,20 +176,14 @@ function[inner_center_stats,outer_center_stats] = center_line_analysis(inner_3d,
             % rotate the cloud based on the local derivative
             % first, rotation matrix for spin around z axis such that the
             % derivative is facing north.
-            z_rot_deg = atand(derivative_eval(j,1)/derivative_eval(j,2));
-            if z_rot_deg < 0
-                z_rot_deg = z_rot_deg +180;
-            else
-            end
-            z_rot_deg = -1* z_rot_deg;
-            z_rot_mat = [cosd(z_rot_deg), sind(z_rot_deg), 0;
-            -sind(z_rot_deg), cosd(z_rot_deg), 0; 0, 0, 1];
-            % then rotation matrix to account for dip (y axis) around
-            y_rot_mat = [cosd(90-inclinations(j)), 0, sind(90-inclinations(j));
-            0, 1, 0; -sind(90-inclinations(j)), 0, cosd(90-inclinations(j))];
+            z_rot_mat = [cosd(declinations(j)), -sind(declinations(j)), 0;
+            sind(declinations(j)), cosd(declinations(j)), 0; 0, 0, 1];
+            % then rotation matrix to account for inclinations
+            x_rot_mat = [1,0,0;0,cosd(90-inclinations(j)), -sind(90-inclinations(j));
+            0, sind(90-inclinations(j)), cosd(90-inclinations(j))];
             % rotate it!
             rotated_1 = z_rot_mat * new_archaeo_cloud';
-            rotated_2 = (y_rot_mat * rotated_1)';
+            rotated_2 = (x_rot_mat * rotated_1)';
             % take the points above and below the proper z values
             points_in_window = rotated_2(:,3) < thickness_sampling & rotated_2(:,3) > -thickness_sampling;
             if sum(points_in_window) >= 10
@@ -204,7 +194,7 @@ function[inner_center_stats,outer_center_stats] = center_line_analysis(inner_3d,
                 min_thick(j) = min(distances, [],'all');
                 max_thick(j) = max(distances, [],'all');
                 mean_thick(j) = mean(distances,'all');
-                center_points(j,:) = (z_rot_mat'*(y_rot_mat'*[centroid,0]'))' + center_line_eval(j,:);
+                center_points(j,:) = (z_rot_mat'*(x_rot_mat'*[centroid,0]'))' + center_line_eval(j,:);
             else
                 min_thick(j) = NaN;
                 max_thick(j) = NaN;
@@ -215,6 +205,7 @@ function[inner_center_stats,outer_center_stats] = center_line_analysis(inner_3d,
         outer_center_spline_points{i} = center_line_eval;
         outer_derivative_spline_points{i} = derivative_eval;
         outer_inclinations{i} = inclinations;
+        outer_declinations{i} = declinations;
         outer_min_thicknesses{i} = min_thick;
         outer_max_thicknesses{i} = max_thick;
         outer_mean_thicknesses{i} = mean_thick;
@@ -225,6 +216,7 @@ function[inner_center_stats,outer_center_stats] = center_line_analysis(inner_3d,
     inner_center_stats.spline = inner_center_spline_points;
     inner_center_stats.derivative = inner_derivative_spline_points;
     inner_center_stats.inclinations = inner_inclinations;
+    inner_center_stats.declinations = inner_declinations;
     inner_center_stats.min_thickness = inner_min_thicknesses;
     inner_center_stats.max_thickness = inner_max_thicknesses;
     inner_center_stats.mean_thickness = inner_mean_thicknesses;
@@ -233,6 +225,7 @@ function[inner_center_stats,outer_center_stats] = center_line_analysis(inner_3d,
     outer_center_stats.spline = outer_center_spline_points;
     outer_center_stats.derivative = outer_derivative_spline_points;
     outer_center_stats.inclinations = outer_inclinations;
+    outer_center_stats.declinations = outer_declinations;
     outer_center_stats.min_thickness = outer_min_thicknesses;
     outer_center_stats.max_thickness = outer_max_thicknesses;
     outer_center_stats.mean_thickness = outer_mean_thicknesses;
