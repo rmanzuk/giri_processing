@@ -29,7 +29,7 @@ function[inner_center_stats,outer_center_stats] = center_line_analysis(inner_3d,
 % OUT
 % inner_center_stats: Structure containing 1xn_archaeo cell arrays where each 
 % cell contains a given measure of the inner tube for the given archaeo.
-% These measurements in order are:
+% These measurements in order are:[in
 %   - spline:the point values from evaluation of a spline fit to the center data
 %   - derivative: the point values from evaluation of derivative of the spline.
 %   - inclinations: local inclination at every evaluation point.

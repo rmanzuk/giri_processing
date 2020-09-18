@@ -92,6 +92,8 @@ for i=startNum:endNum
     workingimage=imread(fullfile(imageDirectory(i).folder,imageDirectory(i).name));
     
     imshow(workingimage,'InitialMagnification',400);
+    ax = gca;
+    ax.Toolbar.Visible = 'off';
     hold on
     if i>1  && ~isempty(inners{i-1})
         plot(inners{i-1}(:,1),inners{i-1}(:,2),':')
@@ -118,6 +120,8 @@ for i=startNum:endNum
     hold off
     
     imshow(workingimage,'InitialMagnification',400); 
+    ax = gca;
+    ax.Toolbar.Visible = 'off';
     hold on
     if i>1 && ~isempty(outers{i-1})
         plot(outers{i-1}(:,1),outers{i-1}(:,2),':')
