@@ -14,7 +14,6 @@ for k = 1:numel(baseFileNames)
   bw_image(row_coord(2):end,:) = 0;
   bw_image(:,1:col_coord(1)) = 0;
   bw_image(:,col_coord(2):end) = 0;
-  
 
   output_file_name = fullfile(output_folder, baseFileNames{k});
   imwrite(bw_image,output_file_name);
