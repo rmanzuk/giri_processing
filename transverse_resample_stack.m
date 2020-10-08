@@ -1,4 +1,4 @@
-Efunction [] = transverse_resample_stack(input_folder, ext, output_folder, output_naming, scale_ratio, resampling_dim)
+function [] = transverse_resample_stack(input_folder, ext, output_folder, output_naming, scale_ratio, resampling_dim)
 % This function takes and existing grinder image stack and resamples it
 % along one of the transverse axes to give new, edge-on photos
 %
