@@ -1,4 +1,4 @@
-function[inner_center_stats,outer_center_stats] = center_line_analysis(inner_3d,outer_3d,inner_center_points,outer_center_points,sample_freq,thickness_sampling)
+function[inner_center_stats,outer_center_stats] = center_line_analysis(inner_3d,outer_3d,center_lines,sample_freq,thickness_sampling)
 % This function takes 3d archaeo point clouds (densified or not) finds the
 % center line of each archaeo at the disired sampling resolution, with the
 % point clouds as is with no rotations.
@@ -10,11 +10,8 @@ function[inner_center_stats,outer_center_stats] = center_line_analysis(inner_3d,
 % outer_3d: 1xn_archaeos cell array containing the densified or non-densified 3d outputs for
 % outer clicked data from the densify_3d or make_clicking_3d functions.
 %
-% inner_center_points: 1xn_archaeo cell array where each cell contains the 3D
-% coordinates for the center line of the inner tube for the given archaeo.
-%
-% outer_center_points: 1xn_archaeo cell array where each cell contains the 3D
-% coordinates for the center line of the inner tube for the given archaeo.
+% center_lines: 1xn_archaeo cell array where each cell contains the 3D
+% coordinates for the center line of the outer tube for the given archaeo.
 %
 % sampling_freq: interval (in the units of the coordinate space) at
 % which you would like to sample the center lines for statistics. So if your
@@ -60,9 +57,9 @@ function[inner_center_stats,outer_center_stats] = center_line_analysis(inner_3d,
     inner_mean_thicknesses = {};
     inner_new_centroids = {};
 
-    for i = 1:numel(inner_center_points)
+    for i = 1:numel(center_lines)
         % extract individual archaeo center line and get rid of nans
-        xyz = inner_center_points{i}';
+        xyz = center_lines{i}';
         xyz = xyz(:,all(~isnan(xyz)));
         % assess center line arclength so we know how many samples to take of
         % its spline
@@ -141,9 +138,9 @@ function[inner_center_stats,outer_center_stats] = center_line_analysis(inner_3d,
     outer_mean_thicknesses = {};
     outer_new_centroids = {};
 
-    for i = 1:numel(outer_center_points)
+    for i = 1:numel(center_lines)
         % extract individual archaeo center line and get rid of nans
-        xyz = outer_center_points{i}';
+        xyz = center_lines{i}';
         xyz = xyz(:,all(~isnan(xyz)));
         % assess center line arclength so we know how many samples to take of
         % its spline
