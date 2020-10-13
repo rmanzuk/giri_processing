@@ -61,7 +61,11 @@ function[inner_center_points,outer_center_points] = svd_center_lines(inner_3d,ou
                     center_points(j,:) = [NaN,NaN,NaN];
                 end
             end
-            inner_center_points{i} = bsxfun(@plus, center_points*inv(V), xyz_mean); center_points*inv(V);
+            centers_moved_back = bsxfun(@plus, center_points*inv(V), xyz_mean); center_points*inv(V);
+            if centers_moved_back(1,3) > centers_moved_back(end,3)
+                centers_moved_back = flip(centers_moved_back);
+            end
+            inner_center_points{i} = centers_moved_back;
     end
 
     outer_center_points = {};
@@ -93,7 +97,11 @@ function[inner_center_points,outer_center_points] = svd_center_lines(inner_3d,ou
                     center_points(j,:) = [NaN, NaN, NaN];
                 end
             end
-            outer_center_points{i} = bsxfun(@plus, center_points*inv(V), xyz_mean); center_points*inv(V);
+            centers_moved_back =  bsxfun(@plus, center_points*inv(V), xyz_mean); center_points*inv(V);
+            if centers_moved_back(1,3) > centers_moved_back(end,3)
+                centers_moved_back = flip(centers_moved_back);
+            end
+            outer_center_points{i} = centers_moved_back;
     end
 
 
