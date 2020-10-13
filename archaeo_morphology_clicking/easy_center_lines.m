@@ -1,4 +1,4 @@
-function[inner_center_points,outer_center_points] = easy_center_lines(inner_3d,outer_3d,sampling_resolution,points_here_thresh,plt)
+function[inner_center_points,outer_center_points] = easy_center_lines(inner_3d,outer_3d,sampling_resolution,points_here_thresh)
 % This function takes 3d archaeo point clouds (densified or not) finds the
 % center line of each archaeo at the disired sampling resolution, with the
 % point clouds as is with no rotations.
