@@ -96,7 +96,7 @@ for i=startNum:endNum
     ax.Toolbar.Visible = 'off';
     hold on
     if i>1  && ~isempty(inners{i-1})
-        plot(inners{i-1}(:,1),inners{i-1}(:,2),':')
+        plot(inners{i-1}(:,1),inners{i-1}(:,2),':','LineWidth',1)
     else
         % do nothing
     end
@@ -109,7 +109,7 @@ for i=startNum:endNum
         x(n) = x_i(1);
         y(n) = y_i(1);
         button(n) = button_i(1);
-        plot(x,y,'r')
+        plot(x,y,'r','LineWidth',1)
         drawnow
     end
     
@@ -124,7 +124,7 @@ for i=startNum:endNum
     ax.Toolbar.Visible = 'off';
     hold on
     if i>1 && ~isempty(outers{i-1})
-        plot(outers{i-1}(:,1),outers{i-1}(:,2),':')
+        plot(outers{i-1}(:,1),outers{i-1}(:,2),':','LineWidth',1)
     else
         % do nothing
     end
@@ -137,7 +137,7 @@ for i=startNum:endNum
         x(n) = x_i(1);
         y(n) = y_i(1);
         button(n) = button_i(1);
-        plot(x,y,'r')
+        plot(x,y,'r','LineWidth',1)
         drawnow
     end
     if exist('x')
