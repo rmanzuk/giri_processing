@@ -34,13 +34,15 @@ function [global_sharpness,window_sharpness] = stack_sharpness(input_dir,n_windo
     base_names = natsortfiles({tifs.name});
     n_images = numel(base_names);
 
-    % just load the frist picture to ginput some windows for sharpness checks
+    % just load the frist picture to take some random windows for sharpness checks
     sample_im_name = fullfile(input_dir, base_names{1});
     sample_im = imread(sample_im_name);
-    imshow(sample_im)
-    fprintf('Plese select 10 points for sharpness windows %u\n', n_windows)
-    window_coords = ginput(10);
-    window_coords = round(window_coords);
+    window_coords = round(rand(n_windows,2).*size(sample_im));
+%     imshow(sample_im)
+%     fprintf('Plese select 10 points for sharpness windows %u\n', n_windows)
+%     window_coords = ginput(10);
+%     window_coords = round(window_coords);
+    
 
     % simple array counting number of images for plotting
     im_count = [0:(numel(tifs)-1)];
@@ -55,13 +57,12 @@ function [global_sharpness,window_sharpness] = stack_sharpness(input_dir,n_windo
         fprintf('Now reading image %u of %u\n', [i,numel(tifs)]);
         full_file_name = fullfile(input_dir, base_names{i});
         this_im = imread(full_file_name);
-        this_im = this_im(:,:,1);
-
+        this_im = im2double(this_im);
         % estimate of sharpness as the sum of all gradient norms/number of
         % pixels
-        [grad_norms,~] = imgradient(this_im);
+        [grad_x,grad_y] = gradient(this_im);
+        grad_norms = sqrt(grad_x.*grad_x+grad_y.*grad_y);
         global_sharpness(i) = sum(sum(grad_norms))./(numel(grad_norms));
-
         % then go and get the sharpenss just in the windows with same metric
         for j = 1:n_windows
             row_ind1 = window_coords(j,1);
@@ -82,7 +83,7 @@ function [global_sharpness,window_sharpness] = stack_sharpness(input_dir,n_windo
 
         % and plot how it's going
         subplot(2,1,1)
-        plot((im_count(1:i)-n_zteps).*z_step_size,global_sharpness(1:i),'DisplayName','global sharpness')
+        plot((im_count(1:i)-n_zsteps).*z_step_size,global_sharpness(1:i),'DisplayName','global sharpness')
         ylabel('Sharpness')
         title('Whole image')
         subplot(2,1,2)
