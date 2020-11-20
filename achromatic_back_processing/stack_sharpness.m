@@ -40,7 +40,7 @@ function [global_sharpness,window_sharpness] = stack_sharpness(input_dir,n_windo
     window_coords = round(rand(n_windows,2).*size(sample_im));
 %     imshow(sample_im)
 %     fprintf('Plese select 10 points for sharpness windows %u\n', n_windows)
-%     window_coords = ginput(10);
+%     window_coords = ginput(n_windows);
 %     window_coords = round(window_coords);
     
 
