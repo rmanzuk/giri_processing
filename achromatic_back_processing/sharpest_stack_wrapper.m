@@ -10,6 +10,12 @@ window_size = 1000;
 n_zsteps = 15;
 z_step_size = 20;
 
+nir_wavelength = 850;
+red_wavelength = 625;
+green_wavelength = 530;
+blue_wavelength = 470;
+uv_wavelength = 365;
+
 blue_dir = '/Users/rmanzuk/Desktop/achromatic_tests/labrador_120mm/blue';
 green_dir = '/Users/rmanzuk/Desktop/achromatic_tests/labrador_120mm/green';
 red_dir = '/Users/rmanzuk/Desktop/achromatic_tests/labrador_120mm/red';
