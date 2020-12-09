@@ -1,4 +1,4 @@
-function [global_sharpness,window_sharpness] = stack_sharpness(input_dir,n_windows,window_size,n_zsteps,z_step_size)
+function [global_sharpness,window_sharpness,window_coords] = stack_sharpness(input_dir,n_windows,window_size,n_zsteps,z_step_size,edge_coords)
 % THis function goes through a single color channel's z-stack (organized in
 % a folder and takes an overall sharpness metric for each as well as
 % sharpness for a number of smaller windows specified
@@ -19,12 +19,18 @@ function [global_sharpness,window_sharpness] = stack_sharpness(input_dir,n_windo
 % 
 % z_step_size: size of each z_step in microns.
 %
+% edge_coords: optional argument with existing coordinates of the upper
+% left corner of specific edges.
+%
 % OUT
 % global_sharpness: (1 x n_image) array with the sharpness metric for each
 % entire image
 %
 % window_sharpness: (n_window x n_image) array with the sharpness metric
 % for each window specified
+%
+% window_coords: upper left coordinates of the windows around edges to be
+% used processing future channels
 %
 % R. A. Manzuk 11/19/2020
     %% begin the function
@@ -35,14 +41,18 @@ function [global_sharpness,window_sharpness] = stack_sharpness(input_dir,n_windo
     n_images = numel(base_names);
 
     % just load the frist picture to take some random windows for sharpness checks
-    sample_im_name = fullfile(input_dir, base_names{1});
-    sample_im = imread(sample_im_name);
-    window_coords = round(rand(n_windows,2).*size(sample_im));
-%     imshow(sample_im)
-%     fprintf('Plese select 10 points for sharpness windows %u\n', n_windows)
-%     window_coords = ginput(n_windows);
-%     window_coords = round(window_coords);
-    
+    if nargin == 6 
+        window_coords = edge_coords;
+    else 
+        sample_im_name = fullfile(input_dir, base_names{1});
+        sample_im = imread(sample_im_name);
+        %window_coords = round(rand(n_windows,2).*size(sample_im));
+        imshow(sample_im)
+        fprintf('Plese select %u points to the upper-left of edges for sharpness windows \n', n_windows)
+        window_coords = ginput(n_windows);
+        window_coords = round(window_coords);
+    end
+    close all
 
     % simple array counting number of images for plotting
     im_count = [0:(numel(tifs)-1)];
