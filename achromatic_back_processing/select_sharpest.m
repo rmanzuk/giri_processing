@@ -24,8 +24,8 @@ function [sharpest_image, sharpest_loc] = select_sharpest(input_dir, global_shar
 % z_step_size: size of each z_step in microns.
 %
 % OUT 
-% sharpest_image: uint8 or 16 (depending on input bit depth) 3D array with
-% the most focused image for that chanel.
+% sharpest_image: fullfile name of the sharpest image, which you can imread
+% if you want
 %
 % sharpest_loc: location of the sharpest image in microns relative to the
 % central (0) image plane
@@ -49,9 +49,8 @@ function [sharpest_image, sharpest_loc] = select_sharpest(input_dir, global_shar
     
     % use the sharpness values as an index to read the stack and grab
     % sharpest image
-    sharpest_name = fullfile(input_dir, base_names{sharpest_ind});
-    sharpest_image = imread(sharpest_name);
+    sharpest_image = fullfile(input_dir, base_names{sharpest_ind});
     
     % and based on that index, where are we geometrically
-    sharpest_loc = (sharpest_ind - n_zsteps) * z_step_size;
+    sharpest_loc = (sharpest_ind - n_zsteps-1) * z_step_size;
 end
