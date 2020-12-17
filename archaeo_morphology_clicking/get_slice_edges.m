@@ -41,4 +41,7 @@ function [edge_coords] = get_slice_edges(image,blur_kernel_size,island_size,hole
     for j = 1:numel(con_comp.PixelIdxList)
         [edge_coords{j}(:,1),edge_coords{j}(:,2)] = ind2sub(size(image),con_comp.PixelIdxList{j});
     end
+    % remove empty cells
+    filled_cells = ~cellfun(@isempty,edge_coords);
+    edge_coords = edge_coords(filled_cells);
 end
