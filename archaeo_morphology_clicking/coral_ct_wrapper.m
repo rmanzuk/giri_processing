@@ -50,14 +50,30 @@ for i = 1:numel(base_names)
     end
 end
 %%
-colors = [get(groot,'defaultAxesColorOrder');get(groot,'defaultAxesColorOrder');get(groot,'defaultAxesColorOrder')];
+% Cleaning up the automated tracing output
 
-for i = 1:numel(final_outers)
-    for j = 1:numel(final_outers{i})
-        if ~isempty(final_outers{i}{j})
-            scatter3(final_outers{i}{j}(:,1),final_outers{i}{j}(:,2),(-5*i).*ones(length(final_outers{i}{j}(:,2)),1),40,colors(j,:))
-        else
-        end
-            hold on
+% first, get rid of edges that don't span more than ~5 slices
+slice_cutoff = 20;
+
+cleaned_outers = remove_spurious_edges(final_outers, slice_cutoff);
+
+% and we also need to rearrange the cell array to be 1xn_branches
+reshaped_outers = reshape_coral_cell(cleaned_outers);
+
+% we also need the edges sorted as if going around the circle, not with
+% sequential indices
+resorted_outers = sort_outline_points(reshaped_outers);
+
+% and then let's downsample the slices
+densify_factor = 0.25;
+[~,downsampled_outers] = densify_slices(reshaped_outers,reshaped_outers,densify_factor);
+
+%% take slice data and make 3d
+[~,outers_3d] = make_clicking_3d(downsampled_outers,downsampled_outers,1,1);
+%%
+for i = 1:numel(outers_3d)
+    for j = 1:numel(outers_3d)
+    scatter3(branching_points_3d(i,j,1),branching_points_3d(i,j,2),branching_points_3d(i,j,3),5,'filled')
+    hold on
     end
 end
