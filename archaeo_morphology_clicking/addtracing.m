@@ -1,4 +1,4 @@
-function [innercells,outercells] = addtracing(imageDirectory,startNum,endNum,existingInners,existingOuters)
+function [innercells,outercells] = addtracing(input_folder,startNum,endNum,existingInners,existingOuters)
 % This function lets you create archeo trace data using ginput,
 % for a single archeo. 
 % It will loop through a set of photos and ask you to input inner and
@@ -8,9 +8,8 @@ function [innercells,outercells] = addtracing(imageDirectory,startNum,endNum,exi
 % your images in .tif format. 
 % 
 % IN
-% imageDirectory: fullfile directory with the folder where the images are
-% stored and their extension. example; imageDirectory = 
-% dir(fullfile('/Users/Nishant/Desktop/PEI/radius/', '*.tif'));
+% input_folder: pathname string for the folder containing the stack of images
+% for a channel
 % startNum: what image # you want to start at. Eg if you only wanna
 % input tracing data for a subset of the images in your stack
 % endNum: what image # in your stack you want to end at. 
@@ -51,7 +50,10 @@ function [innercells,outercells] = addtracing(imageDirectory,startNum,endNum,exi
 
 % CHANGE THIS to point to the folder containing your images
 %filenames = dir(fullfile('/Users/Nishant/Desktop/PEI/radius/', '*.tif'));
-fulln=length(imageDirectory);
+file_pattern = fullfile(input_folder, '*.tif');
+tifs = dir(file_pattern);
+base_names = natsortfiles({tifs.name});
+fulln=numel(base_names);
 
 
 % throws error if number of inputs isn't 2 or 4
@@ -89,7 +91,7 @@ count = 0;
 for i=startNum:endNum
     count = count+1;
     
-    workingimage=imread(fullfile(imageDirectory(i).folder,imageDirectory(i).name));
+    workingimage=imread(fullfile(input_folder, base_names{i}));;
     
     imshow(workingimage,'InitialMagnification',400);
     ax = gca;

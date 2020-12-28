@@ -1,4 +1,4 @@
-function [] = visualize_clicking(outers,imDir)
+function [] = visualize_clicking(outers,input_folder)
 % This function goes through the clicking stack and outlines and labels the
 % archaeos that are a part of the input 'outer' data. The user then 
 % clicks through the stack with a slider. It should help see
@@ -8,9 +8,8 @@ function [] = visualize_clicking(outers,imDir)
 % outers: 1xn_archaeos cell array containing the cell arrays for outer circles 
 % created during data collection. To set this variable up, I just call 
 % outers = {outer1, outer2, ..., outern}
-% imDir: fullfile directory with the folder where the images are
-% stored and their extension. example; imageDirectory = 
-% dir(fullfile('/Users/Nishant/Desktop/PEI/radius/', '*.tif'));
+% input_folder: pathname string for the folder containing the stack of images
+% for a channel
 % pause_time: approximate number of seconds you would like to pause on each
 % frame to help slow down and get a better look. Somewhere around 0.2 seems
 % to work well.
@@ -22,7 +21,10 @@ function [] = visualize_clicking(outers,imDir)
 %
 % R. A. Manzuk, 07/28/2020
     %% begin the function
-    n_slices = numel(imDir);
+    file_pattern = fullfile(input_folder, '*.tif');
+    tifs = dir(file_pattern);
+    base_names = natsortfiles({tifs.name});
+    n_slices = numel(base_names);
 
     % make sure all individual archaeo cell arrays are same size...just in
         % case
@@ -51,7 +53,7 @@ function [] = visualize_clicking(outers,imDir)
     function selection(src,event)
         val = c.Value;
         i = round(val);
-        this_im = imread(fullfile(imDir(i).folder,imDir(i).name));
+        this_im = imread(fullfile(input_folder, base_names{i}));
         slice_outers = {};
         for j = 1:n_archaeos
             slice_outers(j) = outers{j}(i);
