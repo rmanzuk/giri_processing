@@ -6,7 +6,7 @@ load('sm_all_inners.mat')
 load('sm_all_outers.mat')
 block_top_sd = [35,10];
 strike_im_heading = 307;
-imageDir = dir(fullfile('/Users/rmanzuk/Desktop/nevada_jan_2019/sm_117_71_downsampled_25/', '*.tif'));
+input_folder = '/Users/rmanzuk/Desktop/branch_angle_project/archaeo_clicking_data/grinder_stacks/sm_117_71_downsampled_25';
 bedding_sd = [238, 34];
 scale_ratio = 6.874/2;
 um_pixel = 145.4;
@@ -21,14 +21,28 @@ scale_ratio = 6.874;
 block_top_sd = [194,63];
 strike_im_heading = 333;
 bedding_sd = [298, 23];
-imageDir = dir(fullfile('/Users/rmanzuk/Desktop/ketza_2019/grinder_stacks/rlg_136a/downsampled_stack', '*.tif'));
+input_folder = '/Users/rmanzuk/Desktop/branch_angle_project/archaeo_clicking_data/grinder_stacks/rlg_136a';
 um_pixel = 72.7;
 
 inners = rlg136a_inners;
 outers = rlg136a_outers;
+
+%% Load necessary stuff for cc297
+load('cc297_all_inners.mat')
+load('cc297_all_outers.mat')
+scale_ratio = 10;
+block_top_sd = [0,90];
+strike_im_heading = 270;
+bedding_sd = [193, 10];
+input_folder = '/Users/rmanzuk/Desktop/branch_angle_project/archaeo_clicking_data/grinder_stacks/cc297/transverse_resample_every10';
+um_pixel = 40.4;
+
+inners = cc297_inners;
+outers = cc297_outers;
+
 %% Before we do anything, let's densify slices and get the branching points
 [inner_dense_slices,outer_dense_slices] = densify_slices(inners,outers,3);
-[branched_flags,branching_angles,branch_points_3d] = process_branched_network(sm_inners,sm_outers,scale_ratio,10);
+[branched_flags,branching_angles,branch_points_3d] = process_branched_network(inners,outers,scale_ratio,10);
 
 %% Now we can densify in 3d, and take the center lines 
 sampling_resolution = 10;
@@ -44,7 +58,7 @@ n_iter = 5;
 %[center_points(48)] = iterate_center_lines(outer_3d_dense(48),3,points_here_thresh,iterate_stop,1,5,10,10);
 %% and rotate everybody
 [centers_rotated,~] = rotate_clicked_data3d(center_points, center_points, block_top_sd, strike_im_heading, bedding_sd,0);
-[inner_3d_rotated, outer_3d_rotated] = rotate_clicked_data3d(inner_3d_dense, outer_3d_dense, block_top_sd, strike_im_heading, bedding_sd,0);
+[inner_3d_rotated, outer_3d_rotated] = rotate_clicked_data3d(inner_3d_dense, outer_3d_dense, block_top_sd, strike_im_heading, bedding_sd,1);
 [branch_points_rotated] = rotate_branch_points(branch_points_3d, block_top_sd, strike_im_heading, bedding_sd);
 
 %% and get some data
