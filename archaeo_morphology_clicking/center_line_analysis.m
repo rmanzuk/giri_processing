@@ -56,8 +56,20 @@ function[inner_center_stats,outer_center_stats] = center_line_analysis(inner_3d,
     inner_max_thicknesses = {};
     inner_mean_thicknesses = {};
     inner_new_centroids = {};
+    
+    % first we actually need to know which center lines are long enough to
+    % analyze
+    long_enough = logical(zeros(1,numel(center_lines)));
+    
+    for k = 1:numel(center_lines)
+        xyz = center_lines{k};
+        xyz = xyz(all(~isnan(xyz),2),:);
+        if numel(xyz) > 6
+            long_enough(k) = true;
+        end
+    end
 
-    for i = 1:numel(center_lines)
+    for i = find(long_enough)
         % extract individual archaeo center line and get rid of nans
         xyz = center_lines{i}';
         xyz = xyz(:,all(~isnan(xyz)));
@@ -138,7 +150,7 @@ function[inner_center_stats,outer_center_stats] = center_line_analysis(inner_3d,
     outer_mean_thicknesses = {};
     outer_new_centroids = {};
 
-    for i = 1:numel(center_lines)
+    for i = find(long_enough)
         % extract individual archaeo center line and get rid of nans
         xyz = center_lines{i}';
         xyz = xyz(:,all(~isnan(xyz)));
