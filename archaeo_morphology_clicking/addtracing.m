@@ -91,7 +91,7 @@ count = 0;
 for i=startNum:endNum
     count = count+1;
     
-    workingimage=imread(fullfile(input_folder, base_names{i}));;
+    workingimage=imread(fullfile(input_folder, base_names{i}));
     
     imshow(workingimage,'InitialMagnification',400);
     ax = gca;
