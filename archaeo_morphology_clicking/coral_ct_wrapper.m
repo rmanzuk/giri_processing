@@ -53,7 +53,7 @@ end
 % Cleaning up the automated tracing output
 
 % first, get rid of edges that don't span more than ~5 slices
-slice_cutoff = 20;
+slice_cutoff = 3;
 
 cleaned_outers = remove_spurious_edges(final_outers, slice_cutoff);
 
@@ -65,15 +65,22 @@ reshaped_outers = reshape_coral_cell(cleaned_outers);
 resorted_outers = sort_outline_points(reshaped_outers);
 
 % and then let's downsample the slices
-densify_factor = 0.25;
-[~,downsampled_outers] = densify_slices(reshaped_outers,reshaped_outers,densify_factor);
+densify_factor = 0.1;
+[~,downsampled_outers] = densify_slices(resorted_outers,resorted_outers,densify_factor);
 
 %% take slice data and make 3d
-[~,outers_3d] = make_clicking_3d(downsampled_outers,downsampled_outers,1,1);
-%%
-for i = 1:numel(outers_3d)
-    for j = 1:numel(outers_3d)
-    scatter3(branching_points_3d(i,j,1),branching_points_3d(i,j,2),branching_points_3d(i,j,3),5,'filled')
-    hold on
-    end
-end
+scale_ratio = 10;
+[~,outers_3d] = make_clicking_3d(downsampled_outers,downsampled_outers,scale_ratio,1);
+%% and get the branching points
+distance_threshold = 50;
+[branched_flags,branching_points_3d] = id_branch_points(downsampled_outers,scale_ratio,distance_threshold);
+%% get the center lines
+sampling_resolution = 20;
+points_here_thresh = 10;
+[~,center_points] = easy_center_lines(outers_3d,outers_3d,sampling_resolution,points_here_thresh);
+%% get statistics from center lines
+sampling_freq = 1;
+thickness_samp = 3;
+[~,outer_center_stats] = center_line_analysis(outers_3d,outers_3d,center_points,sampling_freq,thickness_samp);
+%% and measure the branch angles
+branch_angles = spline_branch_angles(branching_points_3d,outer_center_stats,300);
