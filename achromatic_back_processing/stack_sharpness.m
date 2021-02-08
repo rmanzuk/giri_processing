@@ -1,5 +1,5 @@
 function [global_sharpness,window_sharpness,window_coords] = stack_sharpness(input_dir,n_windows,window_size,n_zsteps,z_step_size,edge_coords)
-% THis function goes through a single color channel's z-stack (organized in
+% This function goes through a single color channel's z-stack (organized in
 % a folder and takes an overall sharpness metric for each as well as
 % sharpness for a number of smaller windows specified
 % 
