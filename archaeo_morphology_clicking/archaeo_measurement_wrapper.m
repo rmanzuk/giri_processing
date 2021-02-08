@@ -28,8 +28,8 @@ inners = rlg136a_inners;
 outers = rlg136a_outers;
 
 %% Load necessary stuff for cc297
-load('cc297_all_inners.mat')
-load('cc297_all_outers.mat')
+load('/Users/rmanzuk/Desktop/branch_angle_project/archaeo_clicking_data/cc297_all_inners.mat')
+load('/Users/rmanzuk/Desktop/branch_angle_project/archaeo_clicking_data/cc297_all_outers.mat')
 scale_ratio = 10;
 block_top_sd = [0,90];
 strike_im_heading = 270;
@@ -39,6 +39,16 @@ um_pixel = 40.4;
 
 inners = cc297_inners;
 outers = cc297_outers;
+
+%% Load necessary stuff for Labrador Sample
+
+block_top_sd = [127,94];
+strike_im_heading = 68;
+input_folder = '/Users/rmanzuk/Desktop/branch_angle_project/archaeo_clicking_data/grinder_stacks/labrador_r02/8bit_quarter_scale_every25';
+bedding_sd = [187, 15];
+scale_ratio = 6.874;
+um_pixel = 72.7;
+
 
 %% Before we do anything, let's densify slices and get the branching points
 [inner_dense_slices,outer_dense_slices] = densify_slices(inners,outers,3);
