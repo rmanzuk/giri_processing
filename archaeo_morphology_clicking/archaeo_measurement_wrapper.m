@@ -2,8 +2,8 @@
 
 % R. A. Manzuk 09/18/2020
 %% Load necessary stuff for Stuart's Mill Sample
-load('sm_all_inners.mat')
-load('sm_all_outers.mat')
+load('/Users/rmanzuk/Desktop/branch_angle_project/archaeo_clicking_data/sm_all_inners.mat')
+load('/Users/rmanzuk/Desktop/branch_angle_project/archaeo_clicking_data/sm_all_outers.mat')
 block_top_sd = [35,10];
 strike_im_heading = 307;
 input_folder = '/Users/rmanzuk/Desktop/branch_angle_project/archaeo_clicking_data/grinder_stacks/sm_117_71_downsampled_25';
@@ -41,6 +41,8 @@ inners = cc297_inners;
 outers = cc297_outers;
 
 %% Load necessary stuff for Labrador Sample
+load('/Users/rmanzuk/Desktop/branch_angle_project/archaeo_clicking_data/labrador_all_inners.mat');
+load('/Users/rmanzuk/Desktop/branch_angle_project/archaeo_clicking_data/labrador_all_outers.mat');
 
 block_top_sd = [127,94];
 strike_im_heading = 68;
@@ -49,7 +51,8 @@ bedding_sd = [187, 15];
 scale_ratio = 6.874;
 um_pixel = 72.7;
 
-
+inners = labrador_inners;
+outers = labrador_outers;
 %% Before we do anything, let's densify slices and get the branching points
 [inner_dense_slices,outer_dense_slices] = densify_slices(inners,outers,3);
 [branched_flags,branching_angles,branch_points_3d] = process_branched_network(inners,outers,scale_ratio,10);
@@ -62,7 +65,7 @@ sample_freq = 5;
 thickness_sampling = 20;
 n_iter = 5;
 
-[inner_3d_dense,outer_3d_dense] = densify_3d(inner_dense_slices,outer_dense_slices,scale_ratio,3,0);
+[inner_3d_dense,outer_3d_dense] = densify_3d(inner_dense_slices,outer_dense_slices,scale_ratio,3,1);
 [center_points] = iterate_center_lines(outer_3d_dense,sampling_resolution,points_here_thresh,iterate_stop,n_iter,sample_freq,thickness_sampling,15);
 %[center_points(38)] = iterate_center_lines(outer_3d_dense(38),3,points_here_thresh,iterate_stop,1,5,10,10);
 %[center_points(48)] = iterate_center_lines(outer_3d_dense(48),3,points_here_thresh,iterate_stop,1,5,10,10);
@@ -79,6 +82,14 @@ diff_thresh = 5;
 [deriv_means,deriv_variances,thicks_encountered] = centers_plane_pass(outer_center_stats,outer_3d_rotated, diff_thresh);
 [mean_declinations,mean_slope_runs] = cart2pol(deriv_means(:,1),deriv_means(:,2));
 mean_inclinations = atand(deriv_means(:,3)./mean_slope_runs);
+%% 
+lengths_considered = [0.1,0.5,1,2,3]; % in centimeters
+% and apply the scale of the samples
+archaeo_lengths = lengths_considered./(um_pixel/1e4);
+nv_br_angles = [];
+for i = 1:length(lengths_considered)
+    nv_br_angles(:,:,i) = spline_branch_angles(branch_points_rotated,branched_flags,outer_center_stats, archaeo_lengths(i));
+end
 %% make some figures
 figure(1)
 % just the 3d clicking data, rotated
