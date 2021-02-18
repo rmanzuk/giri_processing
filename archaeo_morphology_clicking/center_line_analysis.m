@@ -141,6 +141,19 @@ function[inner_center_stats,outer_center_stats] = center_line_analysis(inner_3d,
         inner_mean_thicknesses{i} = mean_thick;
         inner_new_centroids{i} = center_points;
     end
+    
+    % and just need to ensure sizes are kept, so put empty arrays where not
+    % long enough
+    for i = find(~long_enough)
+        inner_center_spline_points{i} = [];
+        inner_derivative_spline_points{i} = [];
+        inner_inclinations{i} = [];
+        inner_declinations{i} = [];
+        inner_min_thicknesses{i} = [];
+        inner_max_thicknesses{i} = [];
+        inner_mean_thicknesses{i} = [];
+        inner_new_centroids{i} = [];
+    end
 
     outer_center_spline_points = {};
     outer_derivative_spline_points = {};
@@ -220,6 +233,20 @@ function[inner_center_stats,outer_center_stats] = center_line_analysis(inner_3d,
         outer_mean_thicknesses{i} = mean_thick;
         outer_new_centroids{i} = center_points;
     end
+    
+    % and just need to ensure sizes are kept, so put empty arrays where not
+    % long enough
+    for i = find(~long_enough)
+        outer_center_spline_points{i} = [];
+        outer_derivative_spline_points{i} = [];
+        outer_inclinations{i} = [];
+        outer_declinations{i} = [];
+        outer_min_thicknesses{i} = [];
+        outer_max_thicknesses{i} = [];
+        outer_mean_thicknesses{i} = [];
+        outer_new_centroids{i} = [];
+    end
+
     
     % and set up structures for easy output
     inner_center_stats.spline = inner_center_spline_points;
