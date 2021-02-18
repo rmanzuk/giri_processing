@@ -91,7 +91,7 @@ function [inner_3d_dense,outer_3d_dense] = densify_3d(inners,outers,scale_ratio,
         current_points = [current_points; this_slice];
         % then just reorder so button data is last column, and account for
         % ginput y -1
-        inner_3d_dense{i} = [current_points(:,1),current_points(:,2).*-1,current_points(:,4),current_points(:,3)];;
+        inner_3d_dense{i} = [current_points(:,1),current_points(:,2).*-1,current_points(:,4),current_points(:,3)];
     end
 
     % and do the same thing for outer data
