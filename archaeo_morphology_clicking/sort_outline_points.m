@@ -47,8 +47,9 @@ function [resorted_outers] = sort_outline_points(initial_outers)
                 % and then we need to know the distances between all the points
                 distances = pdist2(points_xy,points_xy,'cityblock');
 
-                % and which point what just sorted
+                % and which point was just sorted
                 just_sorted = 1;
+                
 
                 for l = 2:length(already_sorted)
                     dist_from_this_point = distances(just_sorted,:);
@@ -56,11 +57,17 @@ function [resorted_outers] = sort_outline_points(initial_outers)
                     dist_from_this_point(already_sorted) = NaN;
 
                     % which point is closest? update stuff
-                    [~,just_sorted] = min(dist_from_this_point);
-                    already_sorted(just_sorted) = true;
-                    new_outers(l,:) = points_xy(just_sorted,:);
+                    [min_dist,just_sorted] = min(dist_from_this_point);
+                    if min_dist < 5
+                        already_sorted(just_sorted) = true;
+                        new_outers(l,:) = points_xy(just_sorted,:);
+                    else
+                        break
+                    end
                 end 
-                resorted_outers{i}{j} = new_outers;
+                
+                [nonzero_rows,~] = find(new_outers~=0);
+                resorted_outers{i}{j} = new_outers(unique(nonzero_rows),:);
             else
                 %if there are no points there, keep it empty
                 resorted_outers{i}{j} = [];
