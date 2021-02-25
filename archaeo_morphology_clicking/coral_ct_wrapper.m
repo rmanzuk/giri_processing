@@ -54,10 +54,10 @@ cleaned_outers = remove_spurious_edges(final_outers);
 
 %% load pre-processed, cleaned data
 
-load('/Users/rmanzuk/Desktop/branch_angle_project/coral_ct_data/millepora_cleaned.mat');
-load('/Users/rmanzuk/Desktop/branch_angle_project/coral_ct_data/loripes_cleaned.mat');
-load('/Users/rmanzuk/Desktop/branch_angle_project/coral_ct_data/cytherea_cleaned.mat');
-load('/Users/rmanzuk/Desktop/branch_angle_project/coral_ct_data/caroliana_cleaned.mat');
+load('/Users/ryan/Desktop/branch_angle_project/coral_ct_data/millepora_cleaned.mat');
+load('/Users/ryan/Desktop/branch_angle_project/coral_ct_data/loripes_cleaned.mat');
+load('/Users/ryan/Desktop/branch_angle_project/coral_ct_data/cytherea_cleaned.mat');
+load('/Users/ryan/Desktop/branch_angle_project/coral_ct_data/caroliana_cleaned.mat');
 
 %%
 % rearrange the cell array to be 1xn_branches
@@ -69,6 +69,7 @@ clear millepora_cleaned
 clear loripes_cleaned
 clear cytherea_cleaned
 clear caroliana_cleaned
+
 
 % we also need the edges sorted as if going around the circle, not with
 % sequential indices
@@ -82,8 +83,8 @@ clear cytherea_reshaped
 clear caroliana_reshaped
 
 % and then let's downsample the slices
-densify_factor = 0.1;
-
+ densify_factor = 0.1;
+ 
 [~,millepora_downsampled] = densify_slices(millepora_resorted,millepora_resorted,densify_factor);
 [~,loripes_downsampled] = densify_slices(loripes_resorted,loripes_resorted,densify_factor);
 [~,cytherea_downsampled] = densify_slices(cytherea_resorted,cytherea_resorted,densify_factor);
@@ -103,25 +104,25 @@ loripes_scale = 96.5800;
 millepora_scale = 49.9990;
 %% and get the branching points
 distance_threshold = 20;
-combining_threshold = 20;
+combining_threshold = 50;
 scale_ratio = 1;
 [millepora_branched_flags,millepora_branching_points_3d,millepora_combined] = id_branch_points(millepora_downsampled,scale_ratio,distance_threshold,combining_threshold);
 [loripes_branched_flags,loripes_branching_points_3d,loripes_combined] = id_branch_points(loripes_downsampled,scale_ratio,distance_threshold,combining_threshold);
 [cytherea_branched_flags,cytherea_branching_points_3d,cytherea_combined] = id_branch_points(cytherea_downsampled,scale_ratio,distance_threshold,combining_threshold);
 [caroliana_branched_flags,caroliana_branching_points_3d,caroliana_combined] = id_branch_points(caroliana_downsampled,scale_ratio,distance_threshold,combining_threshold);
-clear millepora_downsampled
-clear loripes_downsampled
-clear cytherea_downsampled
-clear caroliana_downsampled
+% clear millepora_downsampled
+% clear loripes_downsampled
+% clear cytherea_downsampled
+% clear caroliana_downsampled
 %% take slice data and make 3d
 [~,millepora_3d] = make_clicking_3d(millepora_combined,millepora_combined,scale_ratio,0);
 [~,loripes_3d] = make_clicking_3d(loripes_combined,loripes_combined,scale_ratio,0);
 [~,cytherea_3d] = make_clicking_3d(cytherea_combined,cytherea_combined,scale_ratio,0);
 [~,caroliana_3d] = make_clicking_3d(caroliana_combined,caroliana_combined,scale_ratio,0);
-clear millepora_combined
-clear loripes_combined
-clear cytherea_combined
-clear caroliana_combined
+% clear millepora_combined
+% clear loripes_combined
+% clear cytherea_combined
+% clear caroliana_combined
 %% get the center lines
 sampling_resolution = 30;
 sampling_freq = 1;

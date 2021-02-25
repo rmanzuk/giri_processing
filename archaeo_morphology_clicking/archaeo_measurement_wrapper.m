@@ -2,11 +2,11 @@
 
 % R. A. Manzuk 09/18/2020
 %% Load necessary stuff for Stuart's Mill Sample
-load('/Users/rmanzuk/Desktop/branch_angle_project/archaeo_clicking_data/sm_all_inners.mat')
-load('/Users/rmanzuk/Desktop/branch_angle_project/archaeo_clicking_data/sm_all_outers.mat')
+load('/Users/ryan/Desktop/branch_angle_project/archaeo_clicking_data/sm_all_inners.mat')
+load('/Users/ryan/Desktop/branch_angle_project/archaeo_clicking_data/sm_all_outers.mat')
 block_top_sd = [35,10];
 strike_im_heading = 307;
-input_folder = '/Users/rmanzuk/Desktop/branch_angle_project/archaeo_clicking_data/grinder_stacks/sm_117_71_downsampled_25';
+input_folder = '/Users/ryan/Desktop/branch_angle_project/archaeo_clicking_data/grinder_stacks/sm_117_71_downsampled_25';
 bedding_sd = [238, 34];
 scale_ratio = 6.874/2;
 um_pixel = 145.4;
@@ -15,38 +15,41 @@ inners = sm_inners;
 outers = sm_outers;
 
 %% Load necessary stuff for RLG136a
-load('rlg136a_all_inners.mat')
-load('rlg136a_all_outers.mat')
+load('/Users/ryan/Desktop/branch_angle_project/archaeo_clicking_data/rlg136a_all_inners.mat')
+load('/Users/ryan/Desktop/branch_angle_project/archaeo_clicking_data/rlg136a_all_outers.mat')
 scale_ratio = 6.874;
 block_top_sd = [194,63];
 strike_im_heading = 333;
 bedding_sd = [298, 23];
-input_folder = '/Users/rmanzuk/Desktop/branch_angle_project/archaeo_clicking_data/grinder_stacks/rlg_136a';
+input_folder = '/Users/ryan/Desktop/branch_angle_project/archaeo_clicking_data/grinder_stacks/rlg_136a';
 um_pixel = 72.7;
 
 inners = rlg136a_inners;
 outers = rlg136a_outers;
 
 %% Load necessary stuff for cc297
-load('/Users/rmanzuk/Desktop/branch_angle_project/archaeo_clicking_data/cc297_all_inners.mat')
-load('/Users/rmanzuk/Desktop/branch_angle_project/archaeo_clicking_data/cc297_all_outers.mat')
+load('/Users/ryan/Desktop/branch_angle_project/archaeo_clicking_data/cc297_all_inners.mat')
+load('/Users/ryan/Desktop/branch_angle_project/archaeo_clicking_data/cc297_all_outers.mat')
+load('/Users/ryan/Desktop/branch_angle_project/archaeo_clicking_data/cc297_crack_left.mat')
+load('/Users/ryan/Desktop/branch_angle_project/archaeo_clicking_data/cc297_crack_right.mat')
+
 scale_ratio = 10;
 block_top_sd = [0,90];
 strike_im_heading = 270;
 bedding_sd = [193, 10];
-input_folder = '/Users/rmanzuk/Desktop/branch_angle_project/archaeo_clicking_data/grinder_stacks/cc297/transverse_resample_every10';
+input_folder = '/Users/ryan/Desktop/branch_angle_project/archaeo_clicking_data/grinder_stacks/cc297/transverse_resample_every10';
 um_pixel = 40.4;
 
 inners = cc297_inners;
 outers = cc297_outers;
 
 %% Load necessary stuff for Labrador Sample
-load('/Users/rmanzuk/Desktop/branch_angle_project/archaeo_clicking_data/labrador_all_inners.mat');
-load('/Users/rmanzuk/Desktop/branch_angle_project/archaeo_clicking_data/labrador_all_outers.mat');
+load('/Users/ryan/Desktop/branch_angle_project/archaeo_clicking_data/labrador_all_inners.mat');
+load('/Users/ryan/Desktop/branch_angle_project/archaeo_clicking_data/labrador_all_outers.mat');
 
 block_top_sd = [127,94];
 strike_im_heading = 68;
-input_folder = '/Users/rmanzuk/Desktop/branch_angle_project/archaeo_clicking_data/grinder_stacks/labrador_r02/8bit_quarter_scale_every25';
+input_folder = '/Users/ryan/Desktop/branch_angle_project/archaeo_clicking_data/grinder_stacks/labrador_r02/8bit_quarter_scale_every25';
 bedding_sd = [187, 15];
 scale_ratio = 6.874;
 um_pixel = 72.7;
@@ -54,7 +57,7 @@ um_pixel = 72.7;
 inners = labrador_inners;
 outers = labrador_outers;
 %% Before we do anything, let's densify slices and get the branching points
-[inner_dense_slices,outer_dense_slices] = densify_slices(inners,outers,3);
+[inner_dense_slices,outer_dense_slices] = densify_slices(inners,outers,10);
 [branched_flags,branching_angles,branch_points_3d] = process_branched_network(inners,outers,scale_ratio,10);
 
 %% Now we can densify in 3d, and take the center lines 
