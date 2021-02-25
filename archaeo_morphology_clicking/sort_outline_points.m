@@ -58,7 +58,7 @@ function [resorted_outers] = sort_outline_points(initial_outers)
 
                     % which point is closest? update stuff
                     [min_dist,just_sorted] = min(dist_from_this_point);
-                    if min_dist < 5
+                    if min_dist < 10
                         already_sorted(just_sorted) = true;
                         new_outers(l,:) = points_xy(just_sorted,:);
                     else
