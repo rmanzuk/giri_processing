@@ -1,4 +1,4 @@
-function[center_points] = iterate_center_lines(outer_3d,sampling_resolution,points_here_thresh,iterate_stop,n_iter,sample_freq,thickness_sampling,derivative_smooth)
+function[center_points] = iterate_center_lines(outer_3d,points_here_thresh,iterate_stop,n_iter,sample_freq,thickness_sampling,derivative_smooth)
 % This function takes 3d archaeo point clouds (densified or not) finds the
 % center line of each archaeo at the disired sampling resolution, with the
 % point clouds as is with no rotations. It does so iteratively, moving the
@@ -9,11 +9,6 @@ function[center_points] = iterate_center_lines(outer_3d,sampling_resolution,poin
 %
 % outer_3d: 1xn_archaeos cell array containing the densified or non-densified 3d outputs for
 % outer clicked data from the densify_3d or make_clicking_3d functions.
-%
-% sampling_resolution: interval (in the units of the coordinate space) at
-% which you would like to sample for the initial center line points. So if your
-% coordinate space is in microns, and you want to sample every 5 microns,
-% this variable should be 5.
 %
 % points_here_thresh: minimum number of points that need to be within an
 % interval for the function to assess the centroid for the interval.
@@ -40,11 +35,8 @@ function[center_points] = iterate_center_lines(outer_3d,sampling_resolution,poin
 % to help not take wild twists into account
 % 
 % OUT
-% inner_center_points: 1xn_archaeo cell array where each cell contains the 3D
-% coordinates for the center line of the inner tube for the given archaeo.
-%
-% outer_center_points: 1xn_archaeo cell array where each cell contains the 3D
-% coordinates for the center line of the inner tube for the given archaeo.
+% center_points: 1xn_branch cell array where each cell contains the 3D
+% coordinates for the center line of the given branch.
 %
 % Ryan A. Manzuk 09/22/2020
 
