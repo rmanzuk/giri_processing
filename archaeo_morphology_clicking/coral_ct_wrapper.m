@@ -83,17 +83,17 @@ clear cytherea_reshaped
 clear caroliana_reshaped
 
 % and then let's downsample the slices
- densify_factor = 0.1;
+densify_factor = 0.3;
  
-[~,millepora_downsampled] = densify_slices(millepora_resorted,millepora_resorted,densify_factor);
-[~,loripes_downsampled] = densify_slices(loripes_resorted,loripes_resorted,densify_factor);
-[~,cytherea_downsampled] = densify_slices(cytherea_resorted,cytherea_resorted,densify_factor);
-[~,caroliana_downsampled] = densify_slices(caroliana_resorted,caroliana_resorted,densify_factor);
+millepora_downsampled = densify_slices(millepora_resorted,0.2);
+loripes_downsampled = densify_slices(loripes_resorted,densify_factor);
+cytherea_downsampled = densify_slices(cytherea_resorted,densify_factor);
+caroliana_downsampled = densify_slices(caroliana_resorted,densify_factor);
 clear millepora_resorted
 clear loripes_resorted
 clear cytherea_resorted
 clear caroliana_resorted
-%% The scales of each specimen
+%% The scales of each specimen in um
 % caroliniana 
 caroliana_scale = 81.1170;
 % cytherea
@@ -115,10 +115,10 @@ scale_ratio = 1;
 % clear cytherea_downsampled
 % clear caroliana_downsampled
 %% take slice data and make 3d
-[~,millepora_3d] = make_clicking_3d(millepora_combined,millepora_combined,scale_ratio,0);
-[~,loripes_3d] = make_clicking_3d(loripes_combined,loripes_combined,scale_ratio,0);
-[~,cytherea_3d] = make_clicking_3d(cytherea_combined,cytherea_combined,scale_ratio,0);
-[~,caroliana_3d] = make_clicking_3d(caroliana_combined,caroliana_combined,scale_ratio,0);
+millepora_3d = make_clicking_3d(millepora_combined,scale_ratio);
+loripes_3d = make_clicking_3d(loripes_combined,scale_ratio);
+cytherea_3d = make_clicking_3d(cytherea_combined,scale_ratio);
+caroliana_3d = make_clicking_3d(caroliana_combined,scale_ratio);
 % clear millepora_combined
 % clear loripes_combined
 % clear cytherea_combined
@@ -127,18 +127,18 @@ scale_ratio = 1;
 sampling_resolution = 30;
 sampling_freq = 1;
 points_here_thresh = 20;
-[~,millepora_center_points] = easy_center_lines(millepora_3d,millepora_3d,sampling_resolution,sampling_freq,points_here_thresh);
-[~,loripes_center_points] = easy_center_lines(loripes_3d,loripes_3d,sampling_resolution,sampling_freq,points_here_thresh);
-[~,cytherea_center_points] = easy_center_lines(cytherea_3d,cytherea_3d,sampling_resolution,sampling_freq,points_here_thresh);
-[~,caroliana_center_points] = easy_center_lines(caroliana_3d,caroliana_3d,sampling_resolution,sampling_freq,points_here_thresh);
+millepora_center_points = easy_center_lines(millepora_3d,sampling_resolution,sampling_freq,points_here_thresh);
+loripes_center_points = easy_center_lines(loripes_3d,sampling_resolution,sampling_freq,points_here_thresh);
+cytherea_center_points = easy_center_lines(cytherea_3d,sampling_resolution,sampling_freq,points_here_thresh);
+caroliana_center_points = easy_center_lines(caroliana_3d,sampling_resolution,sampling_freq,points_here_thresh);
 %% get statistics from center lines
 sampling_freq = 1;
 thickness_samp = 5;
 
-[~,millepora_center_stats] = center_line_analysis(millepora_3d,millepora_3d,millepora_center_points,sampling_freq,thickness_samp);
-[~,loripes_center_stats] = center_line_analysis(loripes_3d,loripes_3d,loripes_center_points,sampling_freq,thickness_samp);
-[~,cytherea_center_stats] = center_line_analysis(cytherea_3d,cytherea_3d,cytherea_center_points,sampling_freq,thickness_samp);
-[~,caroliana_center_stats] = center_line_analysis(caroliana_3d,caroliana_3d,caroliana_center_points,sampling_freq,thickness_samp);
+millepora_center_stats = center_line_analysis(millepora_3d,millepora_center_points,sampling_freq,thickness_samp);
+loripes_center_stats = center_line_analysis(loripes_3d,loripes_center_points,sampling_freq,thickness_samp);
+cytherea_center_stats = center_line_analysis(cytherea_3d,cytherea_center_points,sampling_freq,thickness_samp);
+caroliana_center_stats = center_line_analysis(caroliana_3d,caroliana_center_points,sampling_freq,thickness_samp);
 %% and measure the branch angles
 % lets do it considering multiple lenghts for the calculation
 lengths_considered = [0.1,0.5,1,2,3]; % in centimeters
@@ -172,12 +172,47 @@ caroliana_radii = [];
 for i = 1: length(caroliana_lengths)
     [caroliana_brangles(:,:,i),caroliana_radii(:,:,i)] = spline_branch_angles(caroliana_branching_points_3d,caroliana_branched_flags,caroliana_center_stats,caroliana_lengths(i));
 end
+%% surface areas, volumes, footprints, etc all in cm
+[millepora_surface_area,millepora_volume] = sa_and_vol(millepora_downsampled, scale_ratio, millepora_scale/1e4);
+[loripes_surface_area,loripes_volume] = sa_and_vol(loripes_downsampled, scale_ratio, loripes_scale/1e4);
+[cytherea_surface_area,cytherea_volume] = sa_and_vol(cytherea_downsampled, scale_ratio, cytherea_scale/1e4);
+[caroliana_surface_area,caroliana_volume] = sa_and_vol(caroliana_downsampled, scale_ratio, caroliana_scale/1e4);
 
+[millepora_footprint_points, millepora_footprint_area] = get_footprint(millepora_3d, 3, millepora_scale/1e4);
+[loripes_footprint_points, loripes_footprint_area] = get_footprint(loripes_3d, 3, loripes_scale/1e4);
+[cytherea_footprint_points, cytherea_footprint_area] = get_footprint(cytherea_3d, 3, cytherea_scale/1e4);
+[caroliana_footprint_points, caroliana_footprint_area] = get_footprint(caroliana_3d, 3, caroliana_scale/1e4);
+
+[millepora_convhull_points, millepora_enclosing_volume] = get_enclosing_volume(millepora_3d, millepora_scale/1e4);
+[loripes_convhull_points, loripes_enclosing_volume] = get_enclosing_volume(loripes_3d, loripes_scale/1e4);
+[cytherea_convhull_points, cytherea_enclosing_volume] = get_enclosing_volume(cytherea_3d, cytherea_scale/1e4);
+[caroliana_convhull_points, caroliana_enclosing_volume] = get_enclosing_volume(caroliana_3d, caroliana_scale/1e4);
+%%
+diff_thresh = 5;
+
+[millepora_deriv_means,millepora_deriv_variances,millepora_thicks_encountered,millepora_nn_dists] = centers_plane_pass(millepora_center_stats,millepora_3d, diff_thresh);
+[loripes_deriv_means,loripes_deriv_variances,loripes_thicks_encountered,loripes_nn_dists] = centers_plane_pass(loripes_center_stats,loripes_3d, diff_thresh);
+[cytherea_deriv_means,cytherea_deriv_variances,cytherea_thicks_encountered,cytherea_nn_dists] = centers_plane_pass(cytherea_center_stats,cytherea_3d, diff_thresh);
+[caroliana_deriv_means,caroliana_deriv_variances,caroliana_thicks_encountered,caroliana_nn_dists] = centers_plane_pass(caroliana_center_stats,caroliana_3d, diff_thresh);
 %%
 figure();
-for j=1:length(lengths_considered);
-    subplot(3,2,j)
-    branch_angles = caroliana_brangles(:,:,j);
-    histogram(unique(branch_angles(branch_angles~=0 & branch_angles<90)),10)
-    title([num2str(lengths_considered(j)) ' cm']);
-end
+subplot(2,2,1)
+branch_angles = caroliana_brangles(:,:,4);
+histogram(unique(branch_angles(branch_angles~=0 & branch_angles<90)),10)
+title('A. caroliana')
+xlabel('branch angle')
+subplot(2,2,2)
+branch_angles = cytherea_brangles(:,:,4);
+histogram(unique(branch_angles(branch_angles~=0 & branch_angles<90)),10)
+title('A. cytherea')
+xlabel('branch angle')
+subplot(2,2,3)
+branch_angles = loripes_brangles(:,:,4);
+histogram(unique(branch_angles(branch_angles~=0 & branch_angles<90)),10)
+title('A. loripes')
+xlabel('branch angle')
+subplot(2,2,4)
+branch_angles = millepora_brangles(:,:,4);
+histogram(unique(branch_angles(branch_angles~=0 & branch_angles<90)),10)
+title('A. millepora')
+xlabel('branch angle')
