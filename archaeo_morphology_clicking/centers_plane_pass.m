@@ -1,4 +1,4 @@
-function [deriv_means, deriv_variances, thicks_encountered] = centers_plane_pass(outer_center_stats,outer_3d_rotated, diff_thresh)
+function [deriv_means, deriv_variances, thicks_encountered, nn_dists] = centers_plane_pass(outer_center_stats,outer_3d_rotated, diff_thresh)
 % This function takes the derivative argument of the center stats output
 % and conducts a rotation based upon the mean archaeo heading and the
 % conducts a plane pass from bottom to top to understand the change in
@@ -26,8 +26,11 @@ function [deriv_means, deriv_variances, thicks_encountered] = centers_plane_pass
 % deriv_variances: n_planes x 3 matrix giving the 3D variance of the derivative
 % encountered by each plane going from bottom to top.
 %
-% thicks_encountered:  n_archaeos x n_planes matrix that can be analyzed
+% thicks_encountered:  n_planes x n_branches matrix that can be analyzed
 % for trends in mean thickness.
+%
+% nn_dists:  n_planes x n_branches matrix that gives the distance from each
+% branch to its nearest neighbor at every plane position.
 %
 % R. A. Manzuk 10/13/2020
     %% begin the function
@@ -60,21 +63,28 @@ function [deriv_means, deriv_variances, thicks_encountered] = centers_plane_pass
     outer_rotated_deriv = {};
     centers_rotated_deriv = {};
     for j = 1:numel(outer_3d_rotated)
-        these_outers = outer_3d_rotated{j}(:,1:3);
-        these_centers = outer_center_stats.spline{j};
+        if ~isempty(outer_center_stats.spline{j})
+            these_outers = outer_3d_rotated{j}(:,1:3);
+            these_centers = outer_center_stats.spline{j};
 
-        rot1_outers = z_rot_mat * these_outers';
-        rot1_centers = z_rot_mat * these_centers';
+            rot1_outers = z_rot_mat * these_outers';
+            rot1_centers = z_rot_mat * these_centers';
 
-        outer_rotated_deriv{j} = (x_rot_mat * rot1_outers)';
-        centers_rotated_deriv{j} = (x_rot_mat * rot1_centers)';
+            outer_rotated_deriv{j} = (x_rot_mat * rot1_outers)';
+            centers_rotated_deriv{j} = (x_rot_mat * rot1_centers)';
+        else
+            outer_rotated_deriv{j} = [];
+            centers_rotated_deriv{j} = [];
+        end
     end
     
     % we need to know the range of z values covered by the newly rotated
     % model
     all_z = [];
     for k = 1:numel(outer_rotated_deriv)
-        all_z = [all_z;outer_rotated_deriv{k}(:,3)];
+        if ~isempty(outer_rotated_deriv{k})
+            all_z = [all_z;outer_rotated_deriv{k}(:,3)];
+        end
     end
     min_z_val = round(min(all_z));
     max_z_val = round(max(all_z));
@@ -96,27 +106,34 @@ function [deriv_means, deriv_variances, thicks_encountered] = centers_plane_pass
         centers_here = [];
         % at each plane, need to check each archaeo
         for m = 1:numel(centers_rotated_deriv)
-            % how far are all points of this branch from the current plane?
-            diffs_from_plane = abs(centers_rotated_deriv{m}(:,3) - l);
-            [min_diff,close_ind] = min(diffs_from_plane);
-            % if our closest point isn't close enough, we ignore with NaN
-            if min_diff > diff_thresh
+            if ~isempty(centers_rotated_deriv{m})
+                % how far are all points of this branch from the current plane?
+                diffs_from_plane = abs(centers_rotated_deriv{m}(:,3) - l);
+                [min_diff,close_ind] = min(diffs_from_plane);
+                % if our closest point isn't close enough, we ignore with NaN
+                if min_diff > diff_thresh
+                    derivatives_here(m,:) = [NaN, NaN, NaN];
+                    thicks_here(m,1) = NaN;
+                    centers_here(m,:) = [NaN, NaN, NaN];
+                % if it is close enough, grab its data
+                else
+                    derivatives_here(m,:) = outer_center_stats.derivative{m}(close_ind,:);
+                    thicks_here(m,1) = outer_center_stats.mean_thickness{m}(1,close_ind);
+                    centers_here(m,:) = outer_center_stats.spline{m}(close_ind,:);
+                end
+            else
                 derivatives_here(m,:) = [NaN, NaN, NaN];
                 thicks_here(m,1) = NaN;
                 centers_here(m,:) = [NaN, NaN, NaN];
-            % if it is close enough, grab its data
-            else
-                derivatives_here(m,:) = outer_center_stats.derivative{m}(close_ind,:);
-                thicks_here(m,1) = outer_center_stats.mean_thickness{m}(1,close_ind);
-                centers_here(m,:) = outer_center_stats.spline{m}(close_ind,:);
             end
         end
         % look at this section if you want to understand change in nearest
         % neighbors
-%         centers_encountered(:,:,l-min_z_val+1) = centers_here;
-%         dists = squareform(pdist(centers_here));
-%         dists(1:size(dists,1)+1:end) = NaN;
-%         nn_dists(:,l-min_z_val+1) = min(dists,[],2);
+
+        centers_encountered(:,:,l-min_z_val+1) = centers_here;
+        dists = squareform(pdist(centers_here));
+        dists(1:size(dists,1)+1:end) = NaN;
+        nn_dists(:,l-min_z_val+1) = min(dists,[],2);
 
         % set up the interesting stuff to be spit out
         thicks_encountered(:,l-min_z_val+1) = thicks_here;
@@ -125,4 +142,6 @@ function [deriv_means, deriv_variances, thicks_encountered] = centers_plane_pass
         deriv_means(l-min_z_val+1,:) = mean(derivatives_here,1,'omitnan');
         deriv_variances(l-min_z_val+1,:) = var(derivatives_here,1,'omitnan');
     end 
+    thicks_encountered = thicks_encountered';
+    nn_dists = nn_dists';
 end
