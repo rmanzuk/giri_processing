@@ -1,4 +1,4 @@
-function [surface_area,volume] = sa_and_vol(outers,scale_ratio,branched_flags)
+function [surface_area,volume] = sa_and_vol(outers,scale_ratio,unit_conversion,branched_flags)
 % This function takes outlines of branches that are still separated into
 % slices and goes through slice by slice to calcluate surface area and
 % volume assuming the branch is cylindrical over that unit.
@@ -12,13 +12,18 @@ function [surface_area,volume] = sa_and_vol(outers,scale_ratio,branched_flags)
 % example if images are separated by 100 microns and pixels are 20 microns,
 % this input is 5.
 %
+% unit_conversion: multiplication factor to take the units from pixels to
+% whatever unit you want to measure in. For example, if each pixel
+% represents 500 um and you want to measure in cm, this number would be
+% 0.05.
+%
 % branched_flags: optional, only input if using this for hand clicked
 % archaeos. n_branches x n_branches array with the slice numbers for the
 % branch points between branches. Output from process_branched_network.m
 %
 % OUT
 % surface_area: column vector of length n_slices with the total surface 
-% area of all branches in each slice. Th sum of this vector would be the 
+% area of all branches in each slice. The sum of this vector would be the 
 % total surface area
 %
 % volume: column vector of length n_slices with the total volume of all
@@ -54,7 +59,7 @@ function [surface_area,volume] = sa_and_vol(outers,scale_ratio,branched_flags)
         % which means we need to combine any outlines that have already
         % branched in a smart way that doesn't use their overlapping points in
         % suface area or volume calculations.
-        if nargin >2
+        if nargin >3
            % figure out which ones we need to worry about branching for
            have_branched = find(branched_flags <i & branched_flags > 0);
            [row_inds,col_inds] = ind2sub(size(branched_flags),have_branched);
@@ -102,11 +107,11 @@ function [surface_area,volume] = sa_and_vol(outers,scale_ratio,branched_flags)
             if ~isempty(slice_outers{j})
                 % and take the arclength of the outline
                 warning('off','all')
-                outline_polygon = polyshape(slice_outers{j}(:,1),slice_outers{j}(:,2));
+                outline_polygon = polyshape(slice_outers{j}(:,1).*unit_conversion,slice_outers{j}(:,2).*unit_conversion);
                 % then translate that perimeter to a surface area and vulume of
                 % the segment, assuming a ~cylinder
-                slice_sa = slice_sa + (perimeter(outline_polygon) * scale_ratio);
-                slice_vol = slice_vol + (area(outline_polygon) * scale_ratio);
+                slice_sa = slice_sa + (perimeter(outline_polygon) * scale_ratio * unit_conversion);
+                slice_vol = slice_vol + (area(outline_polygon) * scale_ratio * unit_conversion);
                 warning('on','all')
             end
         end 
