@@ -118,6 +118,8 @@ function [collapsed_outers, collapsed_inners, collapsed_branch_points] = collaps
             branch_points_rot1 = z_rot_mat * these_branch_points';
             branch_points_rotated = x_rot_mat * branch_points_rot1;
             branch_points_rotated = branch_points_rotated';
+        else
+            branch_points_rotated = [];
         end
 
         % now figure out which part of the calcite we need to consider for this
@@ -140,13 +142,24 @@ function [collapsed_outers, collapsed_inners, collapsed_branch_points] = collaps
         max_y = max(outers_rotated(points_in_zrange,2));
 
         % and use those ranges to make a logical of the crack's xy grid
-        crack_y_inds = find(X(1,:) < max_x & X(1,:) > min_x); 
-        crack_x_inds = find(Y(:,1) < max_y & Y(:,1) > min_y);
+        if isempty(max_x)
+            mean_calcite_upper = mean(gridded_right,'all','omitnan');
+            mean_calcite_lower = mean(gridded_left,'all','omitnan');
+        else
+            crack_y_inds = find(X(1,:) < max_x & X(1,:) > min_x); 
+            crack_x_inds = find(Y(:,1) < max_y & Y(:,1) > min_y);
 
-        % find the mean upper and lower height of the calcite at the positions
-        % indicated by this branch
-        mean_calcite_upper = mean(gridded_right(crack_x_inds,crack_y_inds),'all','omitnan');
-        mean_calcite_lower = mean(gridded_left(crack_x_inds,crack_y_inds),'all','omitnan');
+            % find the mean upper and lower height of the calcite at the positions
+            % indicated by this branch
+            mean_calcite_upper = mean(gridded_right(crack_x_inds,crack_y_inds),'all','omitnan');
+            mean_calcite_lower = mean(gridded_left(crack_x_inds,crack_y_inds),'all','omitnan');
+            
+            if isnan(mean_calcite_upper) || isnan(mean_calcite_upper)
+                mean_calcite_upper = mean(gridded_right,'all','omitnan');
+                mean_calcite_lower = mean(gridded_left,'all','omitnan');
+            end
+  
+        end
 
         % then define points above, within, and below the calcite
         points_above = outers_rotated(:,3) >= mean_calcite_upper;
@@ -159,6 +172,11 @@ function [collapsed_outers, collapsed_inners, collapsed_branch_points] = collaps
 
         mean_xy_above = mean(outers_rotated(just_above,1:2));
         mean_xy_below = mean(outers_rotated(just_below,1:2));
+        
+        if isnan(sum(mean_xy_above)) || isnan(sum(mean_xy_below))
+            mean_xy_above = [0,0];
+            mean_xy_below = [0,0];
+        end
 
         below_translation = [2*(mean_xy_above - mean_xy_below)/3,mean_calcite_upper-mean_calcite_lower];
 
@@ -172,7 +190,7 @@ function [collapsed_outers, collapsed_inners, collapsed_branch_points] = collaps
         % only worry about branch points if they're there.
         if ~isempty(branch_points_rotated)
             bps_above = branch_points_rotated(:,3) >= mean_calcite_upper;
-            bps_below = branch_points_rotated(:,3) <= mean_calcite_lower;
+            bps_below = branch_points_rotated(:,3) < mean_calcite_upper;
 
             new_bps = [branch_points_rotated(bps_above,:);(branch_points_rotated(bps_below,:) + below_translation)];
         end
