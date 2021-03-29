@@ -1,4 +1,4 @@
-function [branched_flags,branching_angles,branching_points_3d] = process_branched_network(inners,outers,scale_ratio,slices_above)
+function [branched_flags,branching_points_3d] = process_branched_network(outlines,scale_ratio)
 % This function takes a whole slew of archaeo data and figures out which
 % archaeos branch to each other and what the angle of branching is. Right
 % now, the the indicator of branching is having overlapping outer circle
@@ -6,18 +6,13 @@ function [branched_flags,branching_angles,branching_points_3d] = process_branche
 % up. 
 %
 % IN 
-% inners: 1xn_archaeos cell array containing the cell arrays for inner circles 
-% created during data collection. To set this variable up, I just call 
-% inners = {inner1, inner2, ..., innern}
-% outers: 1xn_archaeos cell array containing the cell arrays for outer circles 
-% created during data collection. To set this variable up, I just call 
-% outers = {outer1, outer2, ..., outern}
+% outlines: 1xn_branches cell array containing the outlines,
+% separated slice-wise, created though automated or clicking data
+% collection. Could be densified.
+%
 % scale_ratio: ratio of vertical image separation to pixel-width. For
 % example if images are separated by 100 microns and pixels are 20 microns,
 % this input is 5.
-% slices_above: the number of slices above a branching point which will be
-% taken into account when calculating the direction vectors for branching
-% archaeos.
 %
 % OUT
 % branched_flags: n_archaeos x n_archaeos comparison matrix where branches
@@ -27,9 +22,7 @@ function [branched_flags,branching_angles,branching_points_3d] = process_branche
 % considdered in both the rows and columns, this matrix is redundant you
 % really only need the half of the data above (or below) the diagonal.
 % Think of it like a covariance matrix. 
-% branching_angles: same as branched_flags but the values indicate the
-% branching angle between the two archaeos as opposed to the branch point
-% slice number.
+%
 % branch_points_3d: n_archaeos x n_archaeos x 3 matrix where the index of
 % (i,j,:) gives the 3d location of the center of the ith archaeo at the
 % point of branching to the jth archaeo.
@@ -38,30 +31,22 @@ function [branched_flags,branching_angles,branching_points_3d] = process_branche
 
     %% begin dat sweet function
     % how many slices are we working with?
-    n_slices = max([cellfun(@numel,inners),cellfun(@numel,outers)],[],'all');
+    n_slices = max([cellfun(@numel,outlines)],[],'all');
 
     % make sure all individual archaeo cell arrays are same size...just in
     % case
-    for i = 1:numel(inners)
-        if numel(inners{i}) < n_slices
-            add_empty = cell(1,n_slices - numel(inners{i}));
-            inners{i}(numel(inners{i})+1:n_slices) = add_empty;
-        else
-            % do nothing
-        end
-    end
 
-    for i = 1:numel(outers)
-        if numel(outers{i}) < n_slices
-            add_empty = cell(1,n_slices - numel(outers{i}));
-            outers{i}(numel(outers{i})+1:n_slices) = add_empty;
+    for i = 1:numel(outlines)
+        if numel(outlines{i}) < n_slices
+            add_empty = cell(1,n_slices - numel(outlines{i}));
+            outlines{i}(numel(outlines{i})+1:n_slices) = add_empty;
         else
             % do nothing
         end
     end
 
     %how many archaeos?
-    n_archaeos = numel(inners);
+    n_archaeos = numel(outlines);
 
     % set up a flagging system to check off archaeos as they branch. so
     % what we're gonna do is have an n_archaeos x n_archaeos comparison
@@ -74,11 +59,9 @@ function [branched_flags,branching_angles,branching_points_3d] = process_branche
     % start at the top of the stack and work your way down.
     for i = 1:n_slices    
         % and then get the data for all of the unique archaeos in the slice
-        slice_inners = {};
         slice_outers = {};
         for j = 1:n_archaeos
-            slice_inners(j) = inners{j}(i);
-            slice_outers(j) = outers{j}(i);
+            slice_outers(j) = outlines{j}(i);
         end
 
         % now we need to know which ones overlap aka branch
@@ -129,11 +112,10 @@ function [branched_flags,branching_angles,branching_points_3d] = process_branche
     end
 
     % cool, we know which archaeos branch to each other, and in which slice
-    % number this happens. Now, we just calculate the angles.
+    % number this happens. Now, we just where these branching points are in 3d.
     
-    % Keep track of angles in a similar comparison matrix where in stead of
-    % noting slice number of the branching point, we'll note angle.
-    branching_angles = zeros(n_archaeos);
+    % Keep track of branch points in a similar comparison matrix where in stead of
+    % noting slice number of the branching point, we'll note a 3d position.
     branching_points_3d = zeros(n_archaeos,n_archaeos,3);
     
     % Go through each entry of the flagging matrix
@@ -141,41 +123,22 @@ function [branched_flags,branching_angles,branching_points_3d] = process_branche
         for j = 1:n_archaeos
             % if it's not zero, we know we've got a branch
             if branched_flags(i,j) ~= 0
-                % and take the ranch of slices from which we'll calculate
-                % the vectors of each archaeo for branch angle
-                branch_slice = branched_flags(i,j);
-                top_slice = branch_slice-slices_above+1;
-                % can't have a top slice outside the stack
-                if top_slice <1
-                    top_slice = 1;
-                else
-                    % do nothing because there is no branch between these
-                    % two
-                end
-                
-                % and then just index the data from the important slices
-                % for each archaeo
-                first_outers = outers{i}(top_slice:branch_slice);
-                first_inners = inners{i}(top_slice:branch_slice);
-                second_outers = outers{j}(top_slice:branch_slice);
-                second_inners = inners{j}(top_slice:branch_slice);
-                % get those vectors
-                [~,first_vec] = centroidline(first_inners,first_outers,0,scale_ratio,0);
-                [~,second_vec] = centroidline(second_inners,second_outers,0,scale_ratio,0);
-                
-                % calculate those angles
-                branching_angles(i,j) = branchangle(first_vec,second_vec);
-                
                 % finally, store those important branching points in 3D for
-                % each archaeo (center of archao at branch point
-                ellipse = fit_ellipse(first_outers{end}(:,1),first_outers{end}(:,2));
+                % each archaeo (center of archao at branch point)
+                
+                % index the first branch's outline at the branch point
+                branch_slice = branched_flags(i,j);
+                first_outers = outlines{i}{branch_slice};
+                % fit ellipse (or polygon)
+                ellipse = fit_ellipse(first_outers(:,1),first_outers(:,2));
                 if isempty(ellipse) || strcmp(ellipse.status, 'Hyperbola found')
-                    pgon=polyshape(first_outers{end}(:,1),first_outers{end}(:,2));
+                    pgon=polyshape(first_outers(:,1),first_outers(:,2));
                     [x,y]=centroid(pgon);
                 else
                     x = ellipse.X0_in;
                     y = ellipse.Y0_in;
                 end
+                % take the center
                 branching_points_3d(i,j,1) = x;
                 branching_points_3d(i,j,2) = -y;
                 branching_points_3d(i,j,3) = branch_slice * -scale_ratio;
