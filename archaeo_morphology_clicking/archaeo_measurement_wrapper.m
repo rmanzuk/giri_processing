@@ -1,31 +1,15 @@
 % script to run through different blocks/functions to analyze different archaeos
 
 % R. A. Manzuk 09/18/2020
+% Last edited: 03/01/2021
 %% Load necessary stuff for Stuart's Mill Sample
 load('/Users/ryan/Desktop/branch_angle_project/archaeo_clicking_data/sm_all_inners.mat')
 load('/Users/ryan/Desktop/branch_angle_project/archaeo_clicking_data/sm_all_outers.mat')
-block_top_sd = [35,10];
-strike_im_heading = 307;
-input_folder = '/Users/ryan/Desktop/branch_angle_project/archaeo_clicking_data/grinder_stacks/sm_117_71_downsampled_25';
-bedding_sd = [238, 34];
-scale_ratio = 6.874/2;
-um_pixel = 145.4;
-
-inners = sm_inners;
-outers = sm_outers;
-
-%% Load necessary stuff for RLG136a
-load('/Users/ryan/Desktop/branch_angle_project/archaeo_clicking_data/rlg136a_all_inners.mat')
-load('/Users/ryan/Desktop/branch_angle_project/archaeo_clicking_data/rlg136a_all_outers.mat')
-scale_ratio = 6.874;
-block_top_sd = [194,63];
-strike_im_heading = 333;
-bedding_sd = [298, 23];
-input_folder = '/Users/ryan/Desktop/branch_angle_project/archaeo_clicking_data/grinder_stacks/rlg_136a';
-um_pixel = 72.7;
-
-inners = rlg136a_inners;
-outers = rlg136a_outers;
+sm_block_top_sd = [35,10];
+sm_strike_im_heading = 307;
+sm_bedding_sd = [238, 34];
+sm_scale_ratio = 6.874/2;
+sm_um_pixel = 145.4;
 
 %% Load necessary stuff for cc297
 load('/Users/ryan/Desktop/branch_angle_project/archaeo_clicking_data/cc297_all_inners.mat')
@@ -33,254 +17,385 @@ load('/Users/ryan/Desktop/branch_angle_project/archaeo_clicking_data/cc297_all_o
 load('/Users/ryan/Desktop/branch_angle_project/archaeo_clicking_data/cc297_crack_left.mat')
 load('/Users/ryan/Desktop/branch_angle_project/archaeo_clicking_data/cc297_crack_right.mat')
 
-scale_ratio = 10;
-block_top_sd = [0,90];
-strike_im_heading = 270;
-bedding_sd = [193, 10];
-input_folder = '/Users/ryan/Desktop/branch_angle_project/archaeo_clicking_data/grinder_stacks/cc297/transverse_resample_every10';
-um_pixel = 40.4;
-
-inners = cc297_inners;
-outers = cc297_outers;
-
+cc297_scale_ratio = 10;
+cc297_block_top_sd = [180,90];
+cc297_strike_im_heading = 90;
+cc297_bedding_sd = [170, 10];
+cc297_um_pixel = 40.4;
 %% Load necessary stuff for Labrador Sample
 load('/Users/ryan/Desktop/branch_angle_project/archaeo_clicking_data/labrador_all_inners.mat');
 load('/Users/ryan/Desktop/branch_angle_project/archaeo_clicking_data/labrador_all_outers.mat');
 
-block_top_sd = [127,94];
-strike_im_heading = 68;
-input_folder = '/Users/ryan/Desktop/branch_angle_project/archaeo_clicking_data/grinder_stacks/labrador_r02/8bit_quarter_scale_every25';
-bedding_sd = [187, 15];
-scale_ratio = 6.874;
-um_pixel = 72.7;
+lbr_block_top_sd = [127,94];
+lbr_strike_im_heading = 68;
+lbr_bedding_sd = [187, 15];
+lbr_scale_ratio = 6.874;
+lbr_um_pixel = 72.7;
 
-inners = labrador_inners;
-outers = labrador_outers;
-%% Before we do anything, let's densify slices and get the branching points
-[inner_dense_slices,outer_dense_slices] = densify_slices(inners,outers,10);
-[branched_flags,branching_angles,branch_points_3d] = process_branched_network(inners,outers,scale_ratio,10);
+%% Run through all the parts for stewart's mill
+% densify the slices
+tic
+sm_inner_dense_slices = densify_slices(sm_inners,5);
+sm_outer_dense_slices = densify_slices(sm_outers,5);
+disp('done densifying slices')
+toc
 
-%% Now we can densify in 3d, and take the center lines 
-sampling_resolution = 10;
+% identify branch points
+tic
+[sm_branched_flags,sm_branch_points_3d] = process_branched_network(sm_outers,sm_scale_ratio);
+disp('done identifying branch points')
+toc
+
+% densify and make 3d
 points_here_thresh = 20;
 iterate_stop = 4;
 sample_freq = 5;
 thickness_sampling = 20;
 n_iter = 5;
+densification = 2;
 
-[inner_3d_dense,outer_3d_dense] = densify_3d(inner_dense_slices,outer_dense_slices,scale_ratio,3,1);
-[center_points] = iterate_center_lines(outer_3d_dense,sampling_resolution,points_here_thresh,iterate_stop,n_iter,sample_freq,thickness_sampling,15);
-%[center_points(38)] = iterate_center_lines(outer_3d_dense(38),3,points_here_thresh,iterate_stop,1,5,10,10);
-%[center_points(48)] = iterate_center_lines(outer_3d_dense(48),3,points_here_thresh,iterate_stop,1,5,10,10);
-%% and rotate everybody
-[centers_rotated,~] = rotate_clicked_data3d(center_points, center_points, block_top_sd, strike_im_heading, bedding_sd,0);
-[inner_3d_rotated, outer_3d_rotated] = rotate_clicked_data3d(inner_3d_dense, outer_3d_dense, block_top_sd, strike_im_heading, bedding_sd,1);
-[branch_points_rotated] = rotate_branch_points(branch_points_3d, block_top_sd, strike_im_heading, bedding_sd);
+tic
+sm_inner_3d_dense = densify_3d(sm_inner_dense_slices,sm_scale_ratio,densification);
+sm_outer_3d_dense = densify_3d(sm_outer_dense_slices,sm_scale_ratio,densification);
+disp('done making 3d and densifying')
+toc
 
-%% and get some data
+% take the center lines
+tic
+sm_center_points = iterate_center_lines(sm_outer_3d_dense,points_here_thresh,iterate_stop,n_iter,sample_freq,thickness_sampling,15);
+disp('done taking the center lines')
+toc
+
+% rotate everybody
+tic
+sm_centers_rotated = rotate_clicked_data3d(sm_center_points, sm_block_top_sd, sm_strike_im_heading, sm_bedding_sd);
+sm_inner_3d_rotated = rotate_clicked_data3d(sm_inner_3d_dense, sm_block_top_sd, sm_strike_im_heading, sm_bedding_sd);
+sm_outer_3d_rotated = rotate_clicked_data3d(sm_outer_3d_dense, sm_block_top_sd, sm_strike_im_heading, sm_bedding_sd);
+sm_branch_points_rotated = rotate_branch_points(sm_branch_points_3d, sm_block_top_sd, sm_strike_im_heading, sm_bedding_sd);
+disp('done rotating data')
+toc
+
+% and get some data
+tic
 sampling_freq = 5;
 thickness_samp = 4;
 diff_thresh = 5;
-[inner_center_stats,outer_center_stats] = center_line_analysis(inner_3d_rotated,outer_3d_rotated,centers_rotated,sampling_freq,thickness_samp);
-[deriv_means,deriv_variances,thicks_encountered] = centers_plane_pass(outer_center_stats,outer_3d_rotated, diff_thresh);
-[mean_declinations,mean_slope_runs] = cart2pol(deriv_means(:,1),deriv_means(:,2));
-mean_inclinations = atand(deriv_means(:,3)./mean_slope_runs);
-%% 
-lengths_considered = [0.1,0.5,1,2,3]; % in centimeters
+
+sm_inner_center_stats = center_line_analysis(sm_inner_3d_rotated,sm_centers_rotated,sample_freq,thickness_sampling);
+sm_outer_center_stats = center_line_analysis(sm_outer_3d_rotated,sm_centers_rotated,sample_freq,thickness_sampling);
+
+[sm_deriv_means,sm_deriv_variances,sm_thicks_encountered,sm_nn_dists] = centers_plane_pass(sm_outer_center_stats,sm_outer_3d_rotated, diff_thresh);
+[sm_mean_declinations,sm_mean_slope_runs] = cart2pol(sm_deriv_means(:,1),sm_deriv_means(:,2));
+sm_mean_inclinations = atand(sm_deriv_means(:,3)./sm_mean_slope_runs);
+
+sm_lengths_considered = [0.1,0.5,1,2,3]; % in centimeters
 % and apply the scale of the samples
-archaeo_lengths = lengths_considered./(um_pixel/1e4);
-nv_br_angles = [];
-for i = 1:length(lengths_considered)
-    nv_br_angles(:,:,i) = spline_branch_angles(branch_points_rotated,branched_flags,outer_center_stats, archaeo_lengths(i));
+sm_archaeo_lengths = sm_lengths_considered./(sm_um_pixel/1e4);
+sm_br_angles = [];
+for i = 1:length(sm_lengths_considered)
+    sm_br_angles(:,:,i) = spline_branch_angles(sm_branch_points_rotated,sm_branched_flags,sm_outer_center_stats, sm_archaeo_lengths(i));
 end
-%% make some figures
-figure(1)
-% just the 3d clicking data, rotated
-for i = 1:numel(outer_3d_rotated)
-plot(outer_3d_rotated{i}(:,1).*um_pixel/10000,outer_3d_rotated{i}(:,3).*um_pixel/10000)
+
+[sm_surface_area,sm_volume] = sa_and_vol(sm_outer_dense_slices,sm_scale_ratio,sm_um_pixel/1e4,sm_branched_flags);
+[sm_footprint_points, sm_footprint_area] = get_footprint(sm_outer_3d_rotated, 3, sm_um_pixel/1e4);
+[sm_convhull_points, sm_enclosing_volume] = get_enclosing_volume(sm_outer_3d_rotated, sm_um_pixel/1e4);
+disp('done gathering data')
+toc
+
+%% Run through all the parts for ketza cc297
+% densify the slices
+tic
+cc297_inner_dense_slices = densify_slices(cc297_inners,5);
+cc297_outer_dense_slices = densify_slices(cc297_outers,5);
+disp('done densifying slices')
+toc
+
+% identify branch points
+tic
+[cc297_branched_flags,cc297_branch_points_3d] = process_branched_network(cc297_outers,cc297_scale_ratio);
+disp('done identifying branch points')
+toc
+
+% densify and make 3d
+points_here_thresh = 20;
+iterate_stop = 4;
+sample_freq = 5;
+thickness_sampling = 20;
+n_iter = 5;
+densification = 2;
+
+tic
+cc297_inner_3d_dense = densify_3d(cc297_inner_dense_slices,cc297_scale_ratio,densification);
+cc297_outer_3d_dense = densify_3d(cc297_outer_dense_slices,cc297_scale_ratio,densification);
+crack_left_3d = densify_3d(cc297_crack_left,cc297_scale_ratio,densification);
+crack_right_3d = densify_3d(cc297_crack_right,cc297_scale_ratio,densification);
+disp('done making 3d and densifying')
+toc
+
+tic
+[cc297_collapsed_outers, cc297_collapsed_inners, cc297_collapsed_branch_points] = collapse_calcite(crack_left_3d, crack_right_3d, cc297_outer_3d_dense, cc297_inner_3d_dense, cc297_branch_points_3d);
+disp('done collapsing calcite')
+toc 
+
+% take the center lines
+tic
+sampling_resolution = 30;
+cc297_center_points = easy_center_lines(cc297_collapsed_outers,sampling_resolution,sample_freq,points_here_thresh);
+disp('done taking the center lines')
+toc
+
+% rotate everybody
+tic
+cc297_centers_rotated = rotate_clicked_data3d(cc297_center_points, cc297_block_top_sd, cc297_strike_im_heading, cc297_bedding_sd);
+cc297_inner_3d_rotated = rotate_clicked_data3d(cc297_collapsed_inners, cc297_block_top_sd, cc297_strike_im_heading, cc297_bedding_sd);
+cc297_outer_3d_rotated = rotate_clicked_data3d(cc297_collapsed_outers, cc297_block_top_sd, cc297_strike_im_heading, cc297_bedding_sd);
+cc297_branch_points_rotated = rotate_branch_points(cc297_branch_points_3d, cc297_block_top_sd, cc297_strike_im_heading, cc297_bedding_sd);
+disp('done rotating data')
+toc
+
+% and get some data
+tic
+sampling_freq = 5;
+thickness_samp = 4;
+diff_thresh = 5;
+
+cc297_inner_center_stats = center_line_analysis(cc297_inner_3d_rotated,cc297_centers_rotated,sample_freq,thickness_sampling);
+cc297_outer_center_stats = center_line_analysis(cc297_outer_3d_rotated,cc297_centers_rotated,sample_freq,thickness_sampling);
+
+[cc297_deriv_means,cc297_deriv_variances,cc297_thicks_encountered,cc297_nn_dists] = centers_plane_pass(cc297_outer_center_stats,cc297_outer_3d_rotated, diff_thresh);
+[cc297_mean_declinations,cc297_mean_slope_runs] = cart2pol(cc297_deriv_means(:,1),cc297_deriv_means(:,2));
+cc297_mean_inclinations = atand(cc297_deriv_means(:,3)./cc297_mean_slope_runs);
+
+cc297_lengths_considered = [0.1,0.5,1,2,3]; % in centimeters
+% and apply the scale of the samples
+cc297_archaeo_lengths = cc297_lengths_considered./(cc297_um_pixel/1e4);
+cc297_br_angles = [];
+for i = 1:length(cc297_lengths_considered)
+    cc297_br_angles(:,:,i) = spline_branch_angles(cc297_branch_points_rotated,cc297_branched_flags,cc297_outer_center_stats, cc297_archaeo_lengths(i));
+end
+
+[cc297_surface_area,cc297_volume] = sa_and_vol(cc297_outer_dense_slices,cc297_scale_ratio,cc297_um_pixel/1e4,cc297_branched_flags);
+[cc297_footprint_points, cc297_footprint_area] = get_footprint(cc297_outer_3d_rotated, 3, cc297_um_pixel/1e4);
+disp('done gathering data')
+toc
+%%
+
+for i = 1:numel(sm_outer_3d_rotated)
+plot(sm_outer_3d_rotated{i}(:,1).*sm_um_pixel/10000,sm_outer_3d_rotated{i}(:,3).*sm_um_pixel/10000)
 hold on
-plot(outer_center_stats.spline{i}(:,1).*um_pixel/10000,outer_center_stats.spline{i}(:,3).*um_pixel/10000);
+plot(sm_outer_center_stats.spline{i}(:,1).*sm_um_pixel/10000,sm_outer_center_stats.spline{i}(:,3).*sm_um_pixel/10000);
 end
 xlabel('Modern geographic azimuth')
 ylabel('Bedding-corrected vertical [cm]')
 
-figure(2)
-% does thickness depend on inclination
-colormap(brewermap(101,'GnBu'))
-inc_thick = [];
-for i = 1:numel(outer_center_stats.spline)
-    inc_thick = [inc_thick;outer_center_stats.inclinations{i},(outer_center_stats.mean_thickness{i}.*um_pixel/1000)'];
+for i = 1:numel(cc297_outer_3d_rotated)
+plot(cc297_outer_3d_rotated{i}(:,1).*cc297_um_pixel/10000,cc297_outer_3d_rotated{i}(:,3).*cc297_um_pixel/10000)
+hold on
+plot(cc297_outer_center_stats.spline{i}(:,1).*cc297_um_pixel/10000,cc297_outer_center_stats.spline{i}(:,3).*cc297_um_pixel/10000);
 end
-hist3(inc_thick,'Nbins',[20,20],'CdataMode','auto')
-colorbar
-view(2)
-
-xlabel('Inclination [degrees]')
-ylabel('Mean outer thickness [mm]') 
-
-figure(3)
-%2d projections, colorded colored by inclination
-subplot(2,2,1)
-max_inc = max(cellfun(@max, outer_center_stats.inclinations)); 
-min_inc = min(cellfun(@min, outer_center_stats.inclinations)); 
-cmap = round(brewermap(101,'GnBu').*255);
-for i = 1:numel(outer_center_stats.spline)
-    x = outer_center_stats.spline{i}(:,1);
-    y = outer_center_stats.spline{i}(:,3);
-    incs = outer_center_stats.inclinations{i};
-    pct_incs = round(((incs - min_inc)./(max_inc-min_inc)).*100)+1;
-    cd = [cmap(pct_incs,:),ones(length(incs),1)];
-    p = plot(x,y);
-    drawnow
-    set(p.Edge,'ColorBinding','interpolated', 'ColorData',uint8(cd'))
-    hold on
-end
-colormap(brewermap(101,'GnBu'))
-colorbar
-caxis([min_inc, max_inc]);
-title('Inclination')
-
-subplot(2,2,2)
-%2d projection colored by mean thicknes of the inner skipping 23 
-max_thick = max(cellfun(@max, inner_center_stats.mean_thickness)); 
-min_thick = min(cellfun(@min, inner_center_stats.mean_thickness)); 
-cmap = round(brewermap(101,'GnBu').*255);
-for i = [1:numel(outer_center_stats.spline)]
-    x = inner_center_stats.spline{i}(:,1);
-    y = inner_center_stats.spline{i}(:,3);
-    thicks = inner_center_stats.mean_thickness{i};
-    thicks(isnan(thicks)) = 2;
-    pct_thicks = round(((thicks - min_thick)./(max_thick-min_thick)).*100)+1;
-    cd = [cmap(pct_thicks,:),ones(length(thicks),1)];
-    p = plot(x,y);
-    drawnow
-    set(p.Edge,'ColorBinding','interpolated', 'ColorData',uint8(cd'))
-    hold on
-end
-colormap(brewermap(101,'GnBu'))
-colorbar
-caxis([min_thick*um_pixel/1000, max_thick*um_pixel/1000]);
-title('Inner thickness')
-
-subplot(2,2,3)
-%2d projection colored by mean thickness
-max_thick = max(cellfun(@max, outer_center_stats.mean_thickness)); 
-min_thick = min(cellfun(@min, outer_center_stats.mean_thickness)); 
-cmap = round(brewermap(101,'GnBu').*255);
-for i = 1:numel(outer_center_stats.spline)
-    x = outer_center_stats.spline{i}(:,1);
-    y = outer_center_stats.spline{i}(:,3);
-    thicks = outer_center_stats.mean_thickness{i};
-    pct_thicks = round(((thicks - min_thick)./(max_thick-min_thick)).*100)+1;
-    cd = [cmap(pct_thicks,:),ones(length(thicks),1)];
-    p = plot(x,y);
-    drawnow
-    set(p.Edge,'ColorBinding','interpolated', 'ColorData',uint8(cd'))
-    hold on
-end
-colormap(brewermap(101,'GnBu'))
-colorbar
-caxis([min_thick*um_pixel/1000, max_thick*um_pixel/1000]);
-title('Outer thickness')
-
-subplot(2,2,4)
-%2d projection colored by mean tube thickness
-max_thick = max(cellfun(@max, outer_center_stats.mean_thickness)) - min(cellfun(@min, inner_center_stats.mean_thickness)); 
-min_thick =  min(cellfun(@min, outer_center_stats.mean_thickness)) - max(cellfun(@max, inner_center_stats.mean_thickness)); 
-cmap = round(brewermap(101,'GnBu').*255);
-for i = [1:numel(outer_center_stats.spline)]
-    x = outer_center_stats.spline{i}(:,1);
-    y = outer_center_stats.spline{i}(:,3);
-    thicks = outer_center_stats.mean_thickness{i} - inner_center_stats.mean_thickness{i};
-    thicks(isnan(thicks)) = 8;
-    pct_thicks = round(((thicks - min_thick)./(max_thick-min_thick)).*100)+1;
-    cd = [cmap(pct_thicks,:),ones(length(thicks),1)];
-    p = plot(x,y);
-    drawnow
-    set(p.Edge,'ColorBinding','interpolated', 'ColorData',uint8(cd'))
-    hold on
-end
-colormap(brewermap(101,'GnBu'))
-colorbar
-caxis([min_thick*um_pixel/1000, max_thick*um_pixel/1000]);
-title('Tube thickness')
- 
-% would be nice to just store which parts of network are past branching
-% points
-above_branch = {};
-for i = [1:numel(outer_center_stats.spline)]
-    top_branch = max(branch_points_rotated(i,:,3));
-    if top_branch == 0
-        above_branch{i} = [1:length(outer_center_stats.spline{i}(:,3))];
-    else
-        those_above = outer_center_stats.spline{i}(:,3) >= top_branch;
-        first_ind = find(those_above,1,'first');
-        above_branch{i} = [first_ind:length(those_above)];
-    end
-end
-
-figure(4)
-% how thickness changes as we move away from branch points
-for i = 1:numel(outer_center_stats.spline)
-    if length(above_branch{i}) > 2
-        x_vals = outer_center_stats.spline{i}(above_branch{i},1);
-        y_vals = outer_center_stats.spline{i}(above_branch{i},2);
-        z_vals = outer_center_stats.spline{i}(above_branch{i},2);
-        [~,seg_length] = arclength(x_vals,y_vals,z_vals);
-        plot(cumsum(seg_length).*um_pixel/1000,outer_center_stats.mean_thickness{i}(above_branch{i}(2:end)).*um_pixel/1000)
-        hold on
-    else
-    end
-end
-xlabel('Arclength from branching [mm]')
-ylabel('Mean outer thickness [mm]') 
-ylim([2,4.5])
-
-figure(5)
-% tortuosity
-for i = 1:numel(outer_center_stats.spline)
-    if length(above_branch{i}) > 2
-        [arc,~] = arclength(outer_center_stats.spline{i}(above_branch{i},1),outer_center_stats.spline{i}(above_branch{i},2),outer_center_stats.spline{i}(above_branch{i},3));
-        p1 = outer_center_stats.spline{i}(above_branch{i}(1),:);
-        p2 = outer_center_stats.spline{i}(above_branch{i}(end),:);
-        distance = sqrt((p2(1)-p1(1))^2 + (p2(2)-p1(2))^2 + (p2(3)-p1(3))^2); 
-        scatter(distance,arc,'filled');
-        hold on
-    else
-    end
-    hold on
-    plot([0:200],[0:200])
-end
-ylabel('Total arclength [mm]')
-xlabel('straightline distance [mm]') 
+xlabel('Modern geographic azimuth')
+ylabel('Bedding-corrected vertical [cm]')
 %%
-% branchgin histos
-c_ord  = get(gca,'ColorOrder');
-angles = [0:180];
-ants_open_pdf = pdf('Normal',angles,43,4);
-% ants_forest_pdf = pdf('Normal',angles,65,2.35);
-isolated_neurons_pdf = pdf('Normal',angles,98,10);
-coral_shallow_pdf = pdf('Normal',angles,90.9,21.9);
-%coral_middle_pdf = pdf('Normal',angles,86.2,16.9);
-%coral_deep_pdf = pdf('Normal',angles,89.4,13.6);
-seepage_channel_pdf = pdf('Normal',angles,72,22.4);
-
-figure(6)
-area(angles,isolated_neurons_pdf,'DisplayName','Isolated neurons (space filling)','FaceColor',c_ord(1,:))
-hold on
-area(angles,coral_shallow_pdf,'DisplayName','Scleractinian (space filling)','FaceColor',c_ord(2,:))
-hold on
-area(angles,seepage_channel_pdf,'DisplayName','Seepage channels (diffusion)','FaceColor',c_ord(3,:))
-% area(angles,ants_forest_pdf,'DisplayName','Ants - forest (material consideration)','FaceColor',c_ord(3,:))
+figure()
+subplot(1,2,1)
+branch_angles = sm_br_angles(:,:,4);
+histogram(unique(branch_angles(branch_angles~=0 & branch_angles<90)),10)
+title(['Stewarts Mill']);
+xlabel('branch angle')
+subplot(1,2,2)
+branch_angles = cc297_br_angles(:,:,4);
+histogram(unique(branch_angles(branch_angles~=0 & branch_angles<90)),10)
+title(['Ketza']);
+xlabel('branch angle')
+%%
+% %% make some figures
+% figure(1)
+% % just the 3d clicking data, rotated
+% for i = 1:numel(outer_3d_rotated)
+% plot(outer_3d_rotated{i}(:,1).*um_pixel/10000,outer_3d_rotated{i}(:,3).*um_pixel/10000)
 % hold on
-area(angles,ants_open_pdf,'DisplayName','Ant trails - open (no material consideration)','FaceColor',c_ord(4,:))
-hold on
-histogram(unique(branching_angles(branching_angles~=0 & branching_angles<90)),10,'Normalization','pdf','DisplayName','This sample','FaceColor',c_ord(6,:))
+% plot(outer_center_stats.spline{i}(:,1).*um_pixel/10000,outer_center_stats.spline{i}(:,3).*um_pixel/10000);
+% end
+% xlabel('Modern geographic azimuth')
+% ylabel('Bedding-corrected vertical [cm]')
+% 
+% figure(2)
+% % does thickness depend on inclination
+% colormap(brewermap(101,'GnBu'))
+% inc_thick = [];
+% for i = 1:numel(outer_center_stats.spline)
+%     inc_thick = [inc_thick;outer_center_stats.inclinations{i},(outer_center_stats.mean_thickness{i}.*um_pixel/1000)'];
+% end
+% hist3(inc_thick,'Nbins',[20,20],'CdataMode','auto')
+% colorbar
+% view(2)
+% 
+% xlabel('Inclination [degrees]')
+% ylabel('Mean outer thickness [mm]') 
+% 
+% figure(3)
+% %2d projections, colorded colored by inclination
+% subplot(2,2,1)
+% max_inc = max(cellfun(@max, outer_center_stats.inclinations)); 
+% min_inc = min(cellfun(@min, outer_center_stats.inclinations)); 
+% cmap = round(brewermap(101,'GnBu').*255);
+% for i = 1:numel(outer_center_stats.spline)
+%     x = outer_center_stats.spline{i}(:,1);
+%     y = outer_center_stats.spline{i}(:,3);
+%     incs = outer_center_stats.inclinations{i};
+%     pct_incs = round(((incs - min_inc)./(max_inc-min_inc)).*100)+1;
+%     cd = [cmap(pct_incs,:),ones(length(incs),1)];
+%     p = plot(x,y);
+%     drawnow
+%     set(p.Edge,'ColorBinding','interpolated', 'ColorData',uint8(cd'))
+%     hold on
+% end
+% colormap(brewermap(101,'GnBu'))
+% colorbar
+% caxis([min_inc, max_inc]);
+% title('Inclination')
+% 
+% subplot(2,2,2)
+% %2d projection colored by mean thicknes of the inner skipping 23 
+% max_thick = max(cellfun(@max, inner_center_stats.mean_thickness)); 
+% min_thick = min(cellfun(@min, inner_center_stats.mean_thickness)); 
+% cmap = round(brewermap(101,'GnBu').*255);
+% for i = [1:numel(outer_center_stats.spline)]
+%     x = inner_center_stats.spline{i}(:,1);
+%     y = inner_center_stats.spline{i}(:,3);
+%     thicks = inner_center_stats.mean_thickness{i};
+%     thicks(isnan(thicks)) = 2;
+%     pct_thicks = round(((thicks - min_thick)./(max_thick-min_thick)).*100)+1;
+%     cd = [cmap(pct_thicks,:),ones(length(thicks),1)];
+%     p = plot(x,y);
+%     drawnow
+%     set(p.Edge,'ColorBinding','interpolated', 'ColorData',uint8(cd'))
+%     hold on
+% end
+% colormap(brewermap(101,'GnBu'))
+% colorbar
+% caxis([min_thick*um_pixel/1000, max_thick*um_pixel/1000]);
+% title('Inner thickness')
+% 
+% subplot(2,2,3)
+% %2d projection colored by mean thickness
+% max_thick = max(cellfun(@max, outer_center_stats.mean_thickness)); 
+% min_thick = min(cellfun(@min, outer_center_stats.mean_thickness)); 
+% cmap = round(brewermap(101,'GnBu').*255);
+% for i = 1:numel(outer_center_stats.spline)
+%     x = outer_center_stats.spline{i}(:,1);
+%     y = outer_center_stats.spline{i}(:,3);
+%     thicks = outer_center_stats.mean_thickness{i};
+%     pct_thicks = round(((thicks - min_thick)./(max_thick-min_thick)).*100)+1;
+%     cd = [cmap(pct_thicks,:),ones(length(thicks),1)];
+%     p = plot(x,y);
+%     drawnow
+%     set(p.Edge,'ColorBinding','interpolated', 'ColorData',uint8(cd'))
+%     hold on
+% end
+% colormap(brewermap(101,'GnBu'))
+% colorbar
+% caxis([min_thick*um_pixel/1000, max_thick*um_pixel/1000]);
+% title('Outer thickness')
+% 
+% subplot(2,2,4)
+% %2d projection colored by mean tube thickness
+% max_thick = max(cellfun(@max, outer_center_stats.mean_thickness)) - min(cellfun(@min, inner_center_stats.mean_thickness)); 
+% min_thick =  min(cellfun(@min, outer_center_stats.mean_thickness)) - max(cellfun(@max, inner_center_stats.mean_thickness)); 
+% cmap = round(brewermap(101,'GnBu').*255);
+% for i = [1:numel(outer_center_stats.spline)]
+%     x = outer_center_stats.spline{i}(:,1);
+%     y = outer_center_stats.spline{i}(:,3);
+%     thicks = outer_center_stats.mean_thickness{i} - inner_center_stats.mean_thickness{i};
+%     thicks(isnan(thicks)) = 8;
+%     pct_thicks = round(((thicks - min_thick)./(max_thick-min_thick)).*100)+1;
+%     cd = [cmap(pct_thicks,:),ones(length(thicks),1)];
+%     p = plot(x,y);
+%     drawnow
+%     set(p.Edge,'ColorBinding','interpolated', 'ColorData',uint8(cd'))
+%     hold on
+% end
+% colormap(brewermap(101,'GnBu'))
+% colorbar
+% caxis([min_thick*um_pixel/1000, max_thick*um_pixel/1000]);
+% title('Tube thickness')
+%  
+% % would be nice to just store which parts of network are past branching
+% % points
+% above_branch = {};
+% for i = [1:numel(outer_center_stats.spline)]
+%     top_branch = max(branch_points_rotated(i,:,3));
+%     if top_branch == 0
+%         above_branch{i} = [1:length(outer_center_stats.spline{i}(:,3))];
+%     else
+%         those_above = outer_center_stats.spline{i}(:,3) >= top_branch;
+%         first_ind = find(those_above,1,'first');
+%         above_branch{i} = [first_ind:length(those_above)];
+%     end
+% end
+% 
+% figure(4)
+% % how thickness changes as we move away from branch points
+% for i = 1:numel(outer_center_stats.spline)
+%     if length(above_branch{i}) > 2
+%         x_vals = outer_center_stats.spline{i}(above_branch{i},1);
+%         y_vals = outer_center_stats.spline{i}(above_branch{i},2);
+%         z_vals = outer_center_stats.spline{i}(above_branch{i},2);
+%         [~,seg_length] = arclength(x_vals,y_vals,z_vals);
+%         plot(cumsum(seg_length).*um_pixel/1000,outer_center_stats.mean_thickness{i}(above_branch{i}(2:end)).*um_pixel/1000)
+%         hold on
+%     else
+%     end
+% end
+% xlabel('Arclength from branching [mm]')
+% ylabel('Mean outer thickness [mm]') 
+% ylim([2,4.5])
+% 
+% figure(5)
+% % tortuosity
+% for i = 1:numel(outer_center_stats.spline)
+%     if length(above_branch{i}) > 2
+%         [arc,~] = arclength(outer_center_stats.spline{i}(above_branch{i},1),outer_center_stats.spline{i}(above_branch{i},2),outer_center_stats.spline{i}(above_branch{i},3));
+%         p1 = outer_center_stats.spline{i}(above_branch{i}(1),:);
+%         p2 = outer_center_stats.spline{i}(above_branch{i}(end),:);
+%         distance = sqrt((p2(1)-p1(1))^2 + (p2(2)-p1(2))^2 + (p2(3)-p1(3))^2); 
+%         scatter(distance,arc,'filled');
+%         hold on
+%     else
+%     end
+%     hold on
+%     plot([0:200],[0:200])
+% end
+% ylabel('Total arclength [mm]')
+% xlabel('straightline distance [mm]') 
+% %%
+% % branchgin histos
+% c_ord  = get(gca,'ColorOrder');
+% angles = [0:180];
+% ants_open_pdf = pdf('Normal',angles,43,4);
+% % ants_forest_pdf = pdf('Normal',angles,65,2.35);
+% isolated_neurons_pdf = pdf('Normal',angles,98,10);
+% coral_shallow_pdf = pdf('Normal',angles,90.9,21.9);
+% %coral_middle_pdf = pdf('Normal',angles,86.2,16.9);
+% %coral_deep_pdf = pdf('Normal',angles,89.4,13.6);
+% seepage_channel_pdf = pdf('Normal',angles,72,22.4);
+% 
+% figure(6)
+% area(angles,isolated_neurons_pdf,'DisplayName','Isolated neurons (space filling)','FaceColor',c_ord(1,:))
 % hold on
-% plot(angles,coral_middle_pdf,'DisplayName','Middle scleractinian')
+% area(angles,coral_shallow_pdf,'DisplayName','Scleractinian (space filling)','FaceColor',c_ord(2,:))
 % hold on
-% plot(angles,coral_deep_pdf,'DisplayName','Deep scleractinian')
-xlim([0,180])
-xlabel('Branching Angle [degrees]')
-ylabel('Probability')
-legend
+% area(angles,seepage_channel_pdf,'DisplayName','Seepage channels (diffusion)','FaceColor',c_ord(3,:))
+% % area(angles,ants_forest_pdf,'DisplayName','Ants - forest (material consideration)','FaceColor',c_ord(3,:))
+% % hold on
+% area(angles,ants_open_pdf,'DisplayName','Ant trails - open (no material consideration)','FaceColor',c_ord(4,:))
+% hold on
+% histogram(unique(branching_angles(branching_angles~=0 & branching_angles<90)),10,'Normalization','pdf','DisplayName','This sample','FaceColor',c_ord(6,:))
+% % hold on
+% % plot(angles,coral_middle_pdf,'DisplayName','Middle scleractinian')
+% % hold on
+% % plot(angles,coral_deep_pdf,'DisplayName','Deep scleractinian')
+% xlim([0,180])
+% xlabel('Branching Angle [degrees]')
+% ylabel('Probability')
+% legend
