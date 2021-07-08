@@ -1,4 +1,4 @@
-function [branch_angles, radii_curvature] = spline_branch_angles(branch_points_3d,branched_flags,center_stats,length_considered)
+function [branch_angles, lengths_used] = spline_branch_angles(branch_points_3d,branched_flags,center_stats,length_considered)
 % This function takes the 3d branching points as well as information about
 % the branch splines to calculate the angle between each branch.
 %
@@ -32,11 +32,15 @@ function [branch_angles, radii_curvature] = spline_branch_angles(branch_points_3
 % indicate which archaeos branch, and the values indicate the
 % branching angle between the two.
 %
+% lengths_used: n_branches x n_branches comparison matrix where cell values
+% are the length of branch i used to calculate the branching angle between
+% branches i and j.
+%
 % R. A. Manzuk 02/01/2021
 %% begin the function
     % loop through all possible branching combinations.
     branch_angles = zeros(size(branch_points_3d,1),size(branch_points_3d,2));
-    radii_curvature = zeros(size(branch_points_3d,1),size(branch_points_3d,2));
+    lengths_used = zeros(size(branch_points_3d,1),size(branch_points_3d,2));
     for i = 1:size(branch_points_3d,1)
         for j = 1:size(branch_points_3d,2)
             % see if these two even branch and are long enough
@@ -97,28 +101,37 @@ function [branch_angles, radii_curvature] = spline_branch_angles(branch_points_3
                     j_inds = j_past_branch & j_below_thresh;
                 end
                 
+                % and let's just make a vector from the first to the last
+                % point in the interval considered
                 
-                % and what is the mean heading (derivative) of each branch
-                % over the interval considered
-                i_mean_vec = mean(center_stats.derivative{i}(i_inds,:));
-                j_mean_vec = mean(center_stats.derivative{j}(j_inds,:));
+                i_start = find(i_inds, 1, 'first');
+                i_end = find(i_inds, 1, 'last');
+                
+                i_vec = center_stats.spline{i}(i_end,:) - center_stats.spline{i}(i_start,:);
+                
+                j_start = find(j_inds, 1, 'first');
+                j_end = find(j_inds, 1, 'last');
+                
+                j_vec = center_stats.spline{j}(j_end,:) - center_stats.spline{j}(j_start,:);
 
                 % and calculate the branch angle
-                if isequal(size(i_mean_vec), size(j_mean_vec))
-                    branch_angles(i,j) = abs(acosd(dot(i_mean_vec,j_mean_vec)/(norm(i_mean_vec)*norm(j_mean_vec))));
+                if isequal(size(i_vec), size(j_vec))
+                    branch_angles(i,j) = acosd(dot(i_vec,j_vec)/(norm(i_vec)*norm(j_vec)));
                 else
                     branch_angles(i,j) = 0;
                 end
                 
-                % lastly, we can calculate the radius of curvature for the
-                % ith branch at this branch point. 
-                x = center_stats.spline{i}(i_inds,1);
-                y = center_stats.spline{i}(i_inds,2);
-                z = center_stats.spline{i}(i_inds,3);
+                % lastly, we can calculate the length of each branch used in the calculation. 
+                if length(center_stats.spline{i}(i_inds,1)) > 2
+                    x = center_stats.spline{i}(i_inds,1);
+                    y = center_stats.spline{i}(i_inds,2);
+                    z = center_stats.spline{i}(i_inds,3);
                 
-                triangulation = delaunayTriangulation(x,y,z);
-                [~,r] = circumcenter(triangulation);
-                radii_curvature(i,j) = mean(r);
+                    lengths_used(i,j) = arclength(x,y,z);
+                else
+                    lengths_used(i,j) = 0;
+                end
+                    
             else
             end
         end

@@ -117,6 +117,8 @@ for i=startNum:endNum
     
     if exist('x')
         inners{i}=[x' y' button'];
+    else
+        inners{i}=[];
     end
     clear x y button
     hold off
@@ -144,6 +146,8 @@ for i=startNum:endNum
     end
     if exist('x')
         outers{i}=[x' y' button'];
+    else
+        outers{i}=[];
     end
     clear x y button
 
