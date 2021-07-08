@@ -73,6 +73,36 @@ for j = 1:numel(caroliana_resorted)
     n_traces = n_traces + sum(~traces_here);
 end
 pptrace_caroliana = total_points/n_traces;
+
+n_traces = 0;
+total_points = 0;
+for j = 1:numel(madracis6m_resorted)
+    [points_here,~] = cellfun(@size, madracis6m_resorted{j}, 'UniformOutput', false);
+    total_points = total_points + sum(cell2mat(points_here));
+    traces_here = cellfun(@isempty,madracis6m_resorted{j});
+    n_traces = n_traces + sum(~traces_here);
+end
+pptrace_madracis6m = total_points/n_traces;
+
+n_traces = 0;
+total_points = 0;
+for j = 1:numel(madracis15m_resorted)
+    [points_here,~] = cellfun(@size, madracis15m_resorted{j}, 'UniformOutput', false);
+    total_points = total_points + sum(cell2mat(points_here));
+    traces_here = cellfun(@isempty,madracis15m_resorted{j});
+    n_traces = n_traces + sum(~traces_here);
+end
+pptrace_madracis15m = total_points/n_traces;
+
+n_traces = 0;
+total_points = 0;
+for j = 1:numel(madracis20m_resorted)
+    [points_here,~] = cellfun(@size, madracis20m_resorted{j}, 'UniformOutput', false);
+    total_points = total_points + sum(cell2mat(points_here));
+    traces_here = cellfun(@isempty,madracis20m_resorted{j});
+    n_traces = n_traces + sum(~traces_here);
+end
+pptrace_madracis20m = total_points/n_traces;
 %%
 load('/Users/ryan/Desktop/branch_angle_project/archaeo_clicking_data/sm_all_outers.mat');
 load('/Users/ryan/Desktop/branch_angle_project/archaeo_clicking_data/cc297_all_outers.mat');
