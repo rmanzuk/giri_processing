@@ -54,7 +54,7 @@ function [branch_angles, lengths_used] = spline_branch_angles2(branch_points_3d,
                 % start with figuring out the two points of the branch
                 % splines that are closest to each other
                 spline_pdists = pdist2(ith_branch_spline,jth_branch_spline);
-                [i_nearest_branch_point,j_nearest_branch_point] = find(spline_pdists==min(spline_pdists(:)));
+                [i_nearest_branch_point,j_nearest_branch_point] = find(spline_pdists==min(spline_pdists(:)),1);
  
                 
                 % account for the type of branch angle this is
