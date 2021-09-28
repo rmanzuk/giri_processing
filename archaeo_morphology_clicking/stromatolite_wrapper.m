@@ -101,6 +101,7 @@ lds_3d = make_clicking_3d(all_stromats_lds,stromat_scale_ratio);
 
 [lds_surface_area,lds_volume] = sa_and_vol(all_stromats_lds,stromat_scale_ratio,1,lds_branched_flags);
 [lds_convhull_points, lds_enclosing_volume] = get_enclosing_volume(lds_3d, 1);
+[lds_surf_areas] = std_sa_encvol(all_stromats_lds,stromat_scale_ratio,10000,n_cubes,cube_size,lds_branched_flags);
 %% columnar, branhcing
 
 % set of radii
@@ -147,6 +148,7 @@ colbras_3d = make_clicking_3d(all_stromats_colbras,stromat_scale_ratio);
 
 [colbras_surface_area,colbras_volume] = sa_and_vol(all_stromats_colbras,stromat_scale_ratio,1,colbras_branched_flags);
 [colbras_convhull_points, colbras_enclosing_volume] = get_enclosing_volume(colbras_3d, 1);
+[colbras_surf_areas] = std_sa_encvol(all_stromats_colbras,stromat_scale_ratio,10000,n_cubes,cube_size,colbras_branched_flags);
 %% conical
 
 height = 7;
@@ -194,7 +196,7 @@ constrom_3d = make_clicking_3d(all_stromats_constrom,stromat_scale_ratio);
 
 [constrom_surface_area,constrom_volume] = sa_and_vol(all_stromats_constrom,stromat_scale_ratio,1,constrom_branched_flags);
 [constrom_convhull_points, constrom_enclosing_volume] = get_enclosing_volume(constrom_3d, 1);
-
+[constrom_surf_areas] = std_sa_encvol(all_stromats_constrom,stromat_scale_ratio,10000,n_cubes,cube_size,constrom_branched_flags);
 %% giant
 
 height = 50;
@@ -242,11 +244,17 @@ gistm_3d = make_clicking_3d(all_stromats_gistm,stromat_scale_ratio);
 
 [gistm_surface_area,gistm_volume] = sa_and_vol(all_stromats_gistm,stromat_scale_ratio,1,gistm_branched_flags);
 [gistm_convhull_points, gistm_enclosing_volume] = get_enclosing_volume(gistm_3d, 1);
+[gistm_surf_areas] = std_sa_encvol(all_stromats_gistm,stromat_scale_ratio,10000,n_cubes,cube_size,gistm_branched_flags);
 %% finally just sa to enclosing volume over time given proportion of occurrences
-sa_vol_mat = [sum(lds_surface_area)/lds_enclosing_volume;...
-    sum(lds_surface_area)/lds_enclosing_volume;...
-    sum(colbras_surface_area)/colbras_enclosing_volume;
-    sum(constrom_surface_area)/constrom_enclosing_volume;...
-    sum(gistm_surface_area)/gistm_enclosing_volume];
+strom_sa_mat = [mean(lds_surf_areas);...
+    mean(lds_surf_areas);...
+    mean(colbras_surf_areas);
+    mean(constrom_surf_areas);...
+    mean(gistm_surf_areas)];
+strom_stdev_mat = [std(lds_surf_areas);...
+    std(lds_surf_areas);...
+    std(colbras_surf_areas);
+    std(constrom_surf_areas);...
+    std(gistm_surf_areas)];
 
-sa_vol_bins = sa_vol_mat' * proportional_thicknesses';
+sa_vol_bins = strom_sa_mat' * proportional_thicknesses';
