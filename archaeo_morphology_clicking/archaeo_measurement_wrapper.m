@@ -94,6 +94,7 @@ sm_mean_inclinations = atand(sm_deriv_means(:,3)./sm_mean_slope_runs);
 [sm_surface_area,sm_volume] = sa_and_vol(sm_outer_dense_slices,sm_scale_ratio,sm_um_pixel/1e4,sm_branched_flags);
 [sm_footprint_points, sm_footprint_area] = get_footprint(sm_outer_3d_rotated, 3, sm_um_pixel/1e4);
 [sm_convhull_points, sm_enclosing_volume] = get_enclosing_volume(sm_outer_3d_rotated, sm_um_pixel/1e4);
+[sm_surf_areas] = std_sa_encvol(sm_outer_dense_slices,sm_scale_ratio,sm_um_pixel,10,30000,sm_branched_flags);
 disp('done gathering data')
 toc
 
@@ -167,6 +168,7 @@ cc297_mean_inclinations = atand(cc297_deriv_means(:,3)./cc297_mean_slope_runs);
 [cc297_surface_area,cc297_volume] = sa_and_vol(cc297_outer_dense_slices,cc297_scale_ratio,cc297_um_pixel/1e4,cc297_branched_flags);
 [cc297_footprint_points, cc297_footprint_area] = get_footprint(cc297_outer_3d_rotated, 3, cc297_um_pixel/1e4);
 [cc297_convhull_points, cc297_enclosing_volume] = get_enclosing_volume(cc297_outer_3d_rotated, cc297_um_pixel/1e4);
+[cc297_surf_areas] = std_sa_encvol(cc297_outer_dense_slices,cc297_scale_ratio,cc297_um_pixel,10,30000,cc297_branched_flags);
 disp('done gathering data')
 toc
 
@@ -233,8 +235,10 @@ labrador_mean_inclinations = atand(labrador_deriv_means(:,3)./labrador_mean_slop
 [labrador_surface_area,labrador_volume] = sa_and_vol(labrador_outer_dense_slices,labrador_scale_ratio,labrador_um_pixel/1e4,labrador_branched_flags);
 [labrador_footprint_points, labrador_footprint_area] = get_footprint(labrador_outer_3d_rotated, 3, labrador_um_pixel/1e4);
 [labrador_convhull_points, labrador_enclosing_volume] = get_enclosing_volume(labrador_outer_3d_rotated, labrador_um_pixel/1e4);
+[labrador_surf_areas] = std_sa_encvol(labrador_outer_dense_slices,labrador_scale_ratio,labrador_um_pixel,10,30000,labrador_branched_flags);
 disp('done gathering data')
 toc
+
 %%
 
 for i = 1:numel(sm_outer_3d_rotated)
