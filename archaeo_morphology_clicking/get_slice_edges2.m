@@ -1,4 +1,4 @@
-function [edge_coords] = get_slice_edges2(image,blur_kernel_size,island_size,hole_size,thresh)
+function [edge_coords,final_binary] = get_slice_edges2(image,blur_kernel_size,island_size,hole_size,thresh)
 % This function takes in a double image that is high-contrast and 
 % easily segmented as a binary and gets the coordines of the edges of all elements and
 % outputs them separately as their own entry in a cell array. Designed to
