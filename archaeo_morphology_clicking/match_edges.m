@@ -37,23 +37,26 @@ function [matched_edges] = match_edges(these_edges,previous_edges,distance_thres
     % easier to work with arrays for now
     these_centers_array = cat(1,these_centers{:});
     previous_centers_array = cat(1,previous_centers{:});
-    for k = 1:size(these_centers_array,1)
-        % calculate the distances between this current center and all other
-        % previous centers
-        distances = zeros(length(still_there_ind),1);
-        distances(still_there_ind) = sqrt(sum((previous_centers_array - these_centers_array(k,:)).^2,2));
-        % fill in the empty ones with nan
-        distances(~still_there_ind) = NaN;
-        % find the closest match
-        [min_dist,match_ind] = min(distances);
-        % if we're close enough, match it
-        if min_dist < distance_thresh
-            matched_edges{match_ind} = these_edges{k};
-        else
-            %if we're not close enough, say this is a new element
-            current_branches = numel(matched_edges);
-            matched_edges{current_branches+1} = these_edges{k};
+    if numel(previous_centers_array) == 0
+        matched_edges = [matched_edges,these_edges];
+    else
+        for k = 1:size(these_centers_array,1)
+            % calculate the distances between this current center and all other
+            % previous centers
+            distances = zeros(length(still_there_ind),1);
+            distances(still_there_ind) = sqrt(sum((previous_centers_array - these_centers_array(k,:)).^2,2));
+            % fill in the empty ones with nan
+            distances(~still_there_ind) = NaN;
+            % find the closest match
+            [min_dist,match_ind] = min(distances);
+            % if we're close enough, match it
+            if min_dist < distance_thresh
+                matched_edges{match_ind} = these_edges{k};
+            else
+                %if we're not close enough, say this is a new element
+                current_branches = numel(matched_edges);
+                matched_edges{current_branches+1} = these_edges{k};
+            end
         end
     end
-    
 end
