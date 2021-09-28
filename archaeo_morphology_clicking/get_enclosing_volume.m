@@ -28,7 +28,7 @@ function [convhull_points, enclosing_volume] = get_enclosing_volume(outers_3d, u
         all_3d = [all_3d; outers_3d{i}(:,1:3).*unit_conversion];
     end
     
-    % then the enclosing volume is the convex hull of those 2d points.
+    % then the enclosing volume is the convex hull of those 3d points.
     [outer_points,enclosing_volume] = convhull(all_3d);
     convhull_points = [all_3d(outer_points,1),all_3d(outer_points,2)];
         
