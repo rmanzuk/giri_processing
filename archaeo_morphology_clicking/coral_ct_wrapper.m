@@ -264,6 +264,46 @@ diff_thresh = 5;
 [madracis6m_deriv_means,madracis6m_deriv_variances,madracis6m_thicks_encountered,madracis6m_nn_dists] = centers_plane_pass(madracis6m_center_stats,madracis6m_3d, diff_thresh);
 [madracis15m_deriv_means,madracis15m_deriv_variances,madracis15m_thicks_encountered,madracis15m_nn_dists] = centers_plane_pass(madracis15m_center_stats,madracis15m_3d, diff_thresh);
 [madracis20m_deriv_means,madracis20m_deriv_variances,madracis20m_thicks_encountered,madracis20m_nn_dists] = centers_plane_pass(madracis20m_center_stats,madracis20m_3d, diff_thresh);
+
+%% standardized surface areas per enclosing volume
+n_cubes = 100;
+cube_size = 40000;
+tic
+[millepora_surf_areas] = std_sa_encvol(millepora_downsampled,scale_ratio,millepora_scale,n_cubes,cube_size);
+[loripes_surf_areas] = std_sa_encvol(loripes_downsampled,scale_ratio,loripes_scale,n_cubes,cube_size);
+[cytherea_surf_areas] = std_sa_encvol(cytherea_downsampled,scale_ratio,cytherea_scale,n_cubes,cube_size);
+[caroliana_surf_areas] = std_sa_encvol(caroliana_downsampled,scale_ratio,caroliana_scale,n_cubes,cube_size);
+toc
+tic
+[madracis6m_surf_areas] = std_sa_encvol(madracis6m_downsampled,scale_ratio,madracis6m_scale,n_cubes,cube_size);
+[madracis15m_surf_areas] = std_sa_encvol(madracis15m_downsampled,scale_ratio,madracis15m_scale,n_cubes,cube_size);
+[madracis20m_surf_areas] = std_sa_encvol(madracis20m_downsampled,scale_ratio,madracis20m_scale,n_cubes,cube_size);
+toc
+tic
+[sm_surf_areas] = std_sa_encvol(sm_outer_dense_slices,sm_scale_ratio,sm_um_pixel,n_cubes,cube_size,sm_branched_flags);
+[cc297_surf_areas] = std_sa_encvol(cc297_outer_dense_slices,cc297_scale_ratio,cc297_um_pixel,n_cubes,cube_size,cc297_branched_flags);
+[labrador_surf_areas] = std_sa_encvol(labrador_outer_dense_slices,labrador_scale_ratio,labrador_um_pixel,n_cubes,cube_size,labrador_branched_flags);
+toc
+%%
+all_surf_data = [millepora_surf_areas';loripes_surf_areas';cytherea_surf_areas';caroliana_surf_areas';...
+    madracis6m_surf_areas';madracis15m_surf_areas';madracis20m_surf_areas';sm_surf_areas';cc297_surf_areas';labrador_surf_areas';lds_surf_areas']/cube_size^3;
+labels = [ones(n_cubes,1);...
+    2*ones(n_cubes,1);...
+    3*ones(n_cubes,1);...
+    5*ones(n_cubes,1);...
+    6*ones(n_cubes,1);...
+    7*ones(n_cubes,1);...
+    8*ones(n_cubes,1);...
+    9*ones(n_cubes,1);...
+    10*ones(n_cubes,1);...
+    11*ones(n_cubes,1);...
+    13*ones(n_cubes,1)];
+    
+
+boxplot(all_surf_data, labels,'orientation','horizontal','symbol','')
+xlabel('Surface area / enclosing volume')
+
+
 %%
 figure();
 subplot(2,2,1)
