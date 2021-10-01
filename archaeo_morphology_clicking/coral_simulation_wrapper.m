@@ -15,7 +15,10 @@ simulation_brangles = {};
 simulation_brlengths = {};
 thicks_encountered = {};
 nn_dists = {};
+deriv_means = {};
+deriv_variances = {};
 for i = 1:numel(subs_list)
+    tic
     % id the stack folder
     file_pattern = fullfile([main_directory '/' subs_list{i}], '*.tiff');
     this_stack = dir(file_pattern);
@@ -83,7 +86,7 @@ for i = 1:numel(subs_list)
     
     % get the center lines
     sampling_resolution = 50;
-    sampling_freq = 3;
+    sampling_freq = 0.5;
     points_here_thresh = 30;
 
     center_points = easy_center_lines(outlines_3d,sampling_resolution,sampling_freq,points_here_thresh);
@@ -101,7 +104,8 @@ for i = 1:numel(subs_list)
     % and measure the branch angles
     [simulation_brangles{i},simulation_brlengths{i}] = spline_branch_angles2(branching_points_3d,branched_flags,center_stats,10);
     % and get center stats
-    [~,~,thicks_encountered{i},nn_dists{i}] = centers_plane_pass(center_stats,outlines_3d, 11);
+    [deriv_means{i},deriv_variances{i},thicks_encountered{i},nn_dists{i}] = centers_plane_pass(center_stats,outlines_3d, 11);
+    toc
 end
 
 %% get out some statistics
@@ -124,3 +128,48 @@ for i = 1:numel(simulation_brangles)
     thickness_means(i) = mean(these_thicks,'all','omitnan');
     thickness_stddevs(i) = std(these_thicks,[],'all','omitnan');
 end
+%% box plots of some stats for changing diffusive characteristics (ext. fig 6)
+
+figure()
+% assemble branching angles for box plot
+all_brangle_data = [simulation_brangles{1}(simulation_brangles{1} >0);simulation_brangles{2}(simulation_brangles{2} >0)];
+labels = [ones(numel(simulation_brangles{1}(simulation_brangles{1} >0)),1);...
+    2*ones(numel(simulation_brangles{2}(simulation_brangles{2} >0)),1)];
+    
+subplot(1,2,1)
+boxplot(all_brangle_data, labels,'symbol','')
+ylabel('Branching Angle [degrees]')
+ylim([0,90])
+
+% assemble branch thicknesses for box plot
+all_thickness_data = [thicks_encountered{1}(:);thicks_encountered{2}(:)];
+labels = [ones(numel(thicks_encountered{1}(:)),1);...
+    2*ones(numel(thicks_encountered{2}(:)),1)];
+    
+subplot(1,2,2)
+boxplot(all_thickness_data, labels,'symbol','')
+ylabel('Branch thickness [arbitrary units]')
+ylim([0,100])
+
+%% box plots of some stats when adding light sensitivity (ext. fig. 6)
+ 
+figure()
+% assemble branching angles for box plot
+all_brangle_data = [simulation_brangles{1}(simulation_brangles{1} >0);simulation_brangles{12}(simulation_brangles{12} >0)];
+labels = [ones(numel(simulation_brangles{1}(simulation_brangles{1} >0)),1);...
+    2*ones(numel(simulation_brangles{12}(simulation_brangles{12} >0)),1)];
+    
+subplot(1,2,1)
+boxplot(all_brangle_data, labels,'symbol','')
+ylabel('Branching Angle [degrees]')
+ylim([0,90])
+
+% assemble branch headings
+all_deriv_data = [deriv_variances{1}(:);deriv_variances{12}(:)];
+labels = [ones(numel(deriv_variances{1}(:)),1);...
+    2*ones(numel(deriv_variances{12}(:)),1)];
+    
+subplot(1,2,2)
+boxplot(all_deriv_data, labels,'symbol','')
+ylabel('Branch heading variance')
+ylim([0,2])

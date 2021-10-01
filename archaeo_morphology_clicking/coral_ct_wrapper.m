@@ -1,17 +1,18 @@
-% scrip to hopefully automate the tracing of edges in coral ct scans
+% script to automate the tracing of edges in coral ct scans
 % (analagous to manual clicking in grinder stacks) to then put traces
 % through same measurement pipeline.
 
 % R. A. Manzuk 12/15/2020
-%% set up the image directory
+%% Example of how to get branch outlines from a coral ct stack
 
+%set up the image directory
 input_folder = '/Users/ryan/Desktop/branch_angle_project/coral_ct_data/kaandorp_scans/8865_8866_raw_tifs_resampled';
 
 file_pattern = fullfile(input_folder, '*.tif');
 tifs = dir(file_pattern);
 base_names = natsortfiles({tifs.name});
 fulln=numel(base_names);
-%% loop though all images and extract edges
+% loop though all images and extract edges
 
 % tunable parameters
 blur_kernel_size = 2;
@@ -56,7 +57,7 @@ end
 %% Cleaning up the automated tracing output
 cleaned_outers = remove_spurious_edges(final_outers);
 
-%% load pre-processed, cleaned data
+%% load pre-processed, cleaned data (start here for analysis!)
 
 load('/Users/ryan/Desktop/branch_angle_project/coral_ct_data/millepora_cleaned.mat');
 load('/Users/ryan/Desktop/branch_angle_project/coral_ct_data/loripes_cleaned.mat');
@@ -302,47 +303,3 @@ labels = [ones(n_cubes,1);...
 
 boxplot(all_surf_data, labels,'orientation','horizontal','symbol','')
 xlabel('Surface area / enclosing volume')
-
-
-%%
-figure();
-subplot(2,2,1)
-branch_angles = caroliana_brangles(:,:,4);
-histogram(unique(branch_angles(branch_angles~=0 & branch_angles<90)),10)
-title('A. caroliana')
-xlabel('branch angle')
-subplot(2,2,2)
-branch_angles = cytherea_brangles(:,:,4);
-histogram(unique(branch_angles(branch_angles~=0 & branch_angles<90)),10)
-title('A. cytherea')
-xlabel('branch angle')
-subplot(2,2,3)
-branch_angles = loripes_brangles(:,:,4);
-histogram(unique(branch_angles(branch_angles~=0 & branch_angles<90)),10)
-title('A. loripes')
-xlabel('branch angle')
-subplot(2,2,4)
-branch_angles = millepora_brangles(:,:,4);
-histogram(unique(branch_angles(branch_angles~=0 & branch_angles<90)),10)
-title('A. millepora')
-xlabel('branch angle')
-
-figure();
-subplot(3,1,1)
-branch_angles = madracis6m_brangles(:,:,4);
-histogram(unique(branch_angles(branch_angles~=0 & branch_angles<90)),10)
-title('Madracis 6m')
-xlabel('branch angle')
-xlim([0,90])
-subplot(3,1,2)
-branch_angles = madracis15m_brangles(:,:,4);
-histogram(unique(branch_angles(branch_angles~=0 & branch_angles<90)),10)
-title('Madracis 15m')
-xlabel('branch angle')
-xlim([0,90])
-subplot(3,1,3)
-branch_angles = madracis20m_brangles(:,:,4);
-histogram(unique(branch_angles(branch_angles~=0 & branch_angles<90)),10)
-title('Madracis 20m')
-xlabel('branch angle')
-xlim([0,90])

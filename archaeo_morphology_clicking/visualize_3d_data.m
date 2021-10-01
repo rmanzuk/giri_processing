@@ -1,4 +1,4 @@
-function [] = visualize_3d_data(input_3d, file_name)
+function [] = visualize_3d_data(input_3d, pixel_res, scale_ratio, file_name)
 % This function takes the branch, cell array of 3d data for this project
 % and visualizes it with plot3. If desired by the user, a filename can be
 % input to save a gif of the plot.
@@ -7,7 +7,14 @@ function [] = visualize_3d_data(input_3d, file_name)
 % input_3d: 1xn_branches cell array with the 3d data for the 3d model being
 % made. could be outlines or centerlines or anything.
 %
+% pixel_res: unit size of each pixel
+%
+% scale_ratio: ratio of vertical image separation to pixel-width. For
+% example if images are separated by 100 microns and pixels are 20 microns,
+% this input is 5.
+%
 % file_name: (optional) string of the desired file name without extension.
+%
 %
 % OUT
 %
@@ -17,12 +24,12 @@ function [] = visualize_3d_data(input_3d, file_name)
     figure();
     for i = 1:numel(input_3d)
         if ~isempty(input_3d{i})
-            plot3(input_3d{i}(:,1),input_3d{i}(:,2),input_3d{i}(:,3))
+            plot3(input_3d{i}(:,1)*pixel_res,input_3d{i}(:,2)*pixel_res,input_3d{i}(:,3)*pixel_res*scale_ratio)
             hold on
         end
     end
     % if we've specified an output name, we'll make and save a gif.
-    if nargin == 2
+    if nargin == 4
         % set initail view
         view_azimuth = 0;
         view_elevation = 90;

@@ -13,16 +13,6 @@ bedding_sd = [238, 34];
 scale_ratio = 6.874/2;
 um_pixel = 145.4;
 
-%% Load necessary stuff for RLG136a
-load('/Users/ryan/Desktop/branch_angle_project/archaeo_clicking_data/rlg136a_all_inners.mat')
-load('/Users/ryan/Desktop/branch_angle_project/archaeo_clicking_data/rlg136a_all_outers.mat')
-scale_ratio = 6.874;
-block_top_sd = [194,63];
-strike_im_heading = 333;
-bedding_sd = [298, 23];
-input_folder = '/Users/ryan/Desktop/branch_angle_project/archaeo_clicking_data/grinder_stacks/rlg_136a';
-um_pixel = 72.7;
-
 
 %% Load necessary stuff for cc297
 load('/Users/ryan/Desktop/branch_angle_project/archaeo_clicking_data/cc297_all_inners.mat')
@@ -48,3 +38,12 @@ bedding_sd = [187, 15];
 scale_ratio = 6.874;
 um_pixel = 72.7;
 
+%% Load necessary stuff for RLG136a (did not use this sample)
+% load('/Users/ryan/Desktop/branch_angle_project/archaeo_clicking_data/rlg136a_all_inners.mat')
+% load('/Users/ryan/Desktop/branch_angle_project/archaeo_clicking_data/rlg136a_all_outers.mat')
+% scale_ratio = 6.874;
+% block_top_sd = [194,63];
+% strike_im_heading = 333;
+% bedding_sd = [298, 23];
+% input_folder = '/Users/ryan/Desktop/branch_angle_project/archaeo_clicking_data/grinder_stacks/rlg_136a';
+% um_pixel = 72.7;
