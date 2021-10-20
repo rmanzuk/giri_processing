@@ -159,9 +159,9 @@ blue_im = imread(fullfile(blue_dir, base_names{green_sharpest_ind}));
 %% I made a spreadsheet of all z-stack sharpness: analyze the data.
 wavelengths = [470,530,590,625,730,850,940];
 
-[~,sheet_name]=xlsfinfo('/Users/rmanzuk/Dropbox (Princeton)/achromatic_project/z_stack_sharpness.xlsx');
+[~,sheet_name]=xlsfinfo('/Users/ryan/Dropbox (Princeton)/achromatic_project/z_stack_sharpness.xlsx');
 for k=1:numel(sheet_name)
-  data{k}=xlsread('/Users/rmanzuk/Dropbox (Princeton)/achromatic_project/z_stack_sharpness.xlsx',sheet_name{k});
+  data{k}=xlsread('/Users/ryan/Dropbox (Princeton)/achromatic_project/z_stack_sharpness.xlsx',sheet_name{k});
 end
 
 sharpest_loc = {};
@@ -169,7 +169,7 @@ normalized_data = {};
 for i = 1:numel(data)
     % extract maxima
     [maxima,sharpest_loc{i}] = max(data{i}(:,4:end));
-    % normalize
+    % normalize such that all curves go between 0 and 1
     minima = min(data{i}(:,4:end));
     normalized_data{i} = (data{i}(:,4:end) - minima)./(maxima-minima);
 end
@@ -223,3 +223,110 @@ for m = 1:numel(data)
     
 end
 legend()
+
+%% those figures are nice to think about changes between samples, but what about 1 figure about chromatic aberration
+
+% we'll use the target because it's flat and easiest to work with (index #
+% 5 of the data cell)
+
+% conversion factor between inches and microns
+conversion_fac = 25400;
+
+% scale power to accentuate focus differences
+scale_power = 200;
+
+% and the limits we'll want for plotting
+x_min = 425;
+x_max = 1000;
+y_min = -500;
+y_max = 500; 
+
+% id the columns in the data set that correspond to whole image sharpness
+global_cols = [1:2:13];
+
+% then select the table positions (1st column of data) that correspond to
+% the sharpest images
+[maxima,sharpest_loc] = max(movmean(data{5}(:,4:end),20));
+global_sharpest = ((data{5}(sharpest_loc(global_cols)',1)) - data{5}(sharpest_loc(global_cols(2)))).*conversion_fac;
+
+% define the range of x values we want to plot
+xx = [x_min:x_max];
+% fit a spline for wavelengths and sharpest positions
+yy_global = spline(wavelengths,global_sharpest,xx);
+
+% then define each sharpness as a percent of the maximum sharpness
+% need the minima
+minima = min(movmean(data{5}(:,4:end),20));
+pct_max_sharpness = (movmean(data{5}(:,4:end),20)-minima)./(maxima-minima);
+
+
+
+% most interested in table heights between y_min and y_max, so define
+% that zone
+
+in_window = (data{5}(:,1)- data{5}(sharpest_loc(global_cols(2)))).*conversion_fac > y_min & (data{5}(:,1)- data{5}(sharpest_loc(global_cols(2)))).*conversion_fac < y_max;
+
+
+
+% we'll make each wavelengths best sharpness into a patch with alpha
+% dictated by sharpness
+% the blue patch
+patch_x_blue = patch([ones(1,sum(in_window)) .* x_min, ones(1,sum(in_window)) .* x_max],[linspace(y_min,y_max,sum(in_window)), flip(linspace(y_min,y_max,sum(in_window)))],[0,0,1],'HandleVisibility','off');
+patch_x_blue.FaceVertexAlphaData = [pct_max_sharpness(in_window,global_cols(1)).^scale_power;flip(pct_max_sharpness(in_window,global_cols(1)).^scale_power)];   
+patch_x_blue.FaceAlpha = 'interp' ;
+patch_x_blue.EdgeAlpha = 0 ;
+hold on
+
+% the green patch
+patch_x_green = patch([ones(1,sum(in_window)) .* x_min, ones(1,sum(in_window)) .* x_max],[linspace(y_min,y_max,sum(in_window)), flip(linspace(y_min,y_max,sum(in_window)))],[0,1,0],'HandleVisibility','off');
+patch_x_green.FaceVertexAlphaData = [pct_max_sharpness(in_window,global_cols(2)).^scale_power;flip(pct_max_sharpness(in_window,global_cols(2)).^scale_power)];   
+patch_x_green.FaceAlpha = 'interp' ;
+patch_x_green.EdgeAlpha = 0 ;
+hold on
+
+% the yellow patch
+patch_x_yellow = patch([ones(1,sum(in_window)) .* x_min, ones(1,sum(in_window)) .* x_max],[linspace(y_min,y_max,sum(in_window)), flip(linspace(y_min,y_max,sum(in_window)))],[1,1,0],'HandleVisibility','off');
+patch_x_yellow.FaceVertexAlphaData = [pct_max_sharpness(in_window,global_cols(3)).^scale_power;flip(pct_max_sharpness(in_window,global_cols(3)).^scale_power)];   
+patch_x_yellow.FaceAlpha = 'interp' ;  
+patch_x_yellow.EdgeAlpha = 0 ;
+hold on
+
+% the red patch
+patch_x_red = patch([ones(1,sum(in_window)) .* x_min, ones(1,sum(in_window)) .* x_max],[linspace(y_min,y_max,sum(in_window)), flip(linspace(y_min,y_max,sum(in_window)))],[1,0,0],'HandleVisibility','off');
+patch_x_red.FaceVertexAlphaData = [pct_max_sharpness(in_window,global_cols(4)).^scale_power;flip(pct_max_sharpness(in_window,global_cols(4)).^scale_power)];   
+patch_x_red.FaceAlpha = 'interp' ;  
+patch_x_red.EdgeAlpha = 0 ;
+hold on
+
+% the red-edge patch
+patch_x_red_edge = patch([ones(1,sum(in_window)) .* x_min, ones(1,sum(in_window)) .* x_max],[linspace(y_min,y_max,sum(in_window)), flip(linspace(y_min,y_max,sum(in_window)))],[0.698,0.133,0.133],'HandleVisibility','off');
+patch_x_red_edge.FaceVertexAlphaData = [pct_max_sharpness(in_window,global_cols(5)).^scale_power;flip(pct_max_sharpness(in_window,global_cols(5)).^scale_power)];   
+patch_x_red_edge.FaceAlpha = 'interp' ;
+patch_x_red_edge.EdgeAlpha = 0 ;
+hold on
+
+% the nir patch
+patch_x_nir = patch([ones(1,sum(in_window)) .* x_min, ones(1,sum(in_window)) .* x_max],[linspace(y_min,y_max,sum(in_window)), flip(linspace(y_min,y_max,sum(in_window)))],[0.5,0.5,0.5],'HandleVisibility','off');
+patch_x_nir.FaceVertexAlphaData = [pct_max_sharpness(in_window,global_cols(6)).^scale_power;flip(pct_max_sharpness(in_window,global_cols(6)).^scale_power)];   
+patch_x_nir.FaceAlpha = 'interp' ;  
+patch_x_nir.EdgeAlpha = 0 ;
+hold on
+
+% the ir patch
+patch_x_ir = patch([ones(1,sum(in_window)) .* x_min, ones(1,sum(in_window)) .* x_max],[linspace(y_min,y_max,sum(in_window)), flip(linspace(y_min,y_max,sum(in_window)))],[0.1,0.1,0.1]./255,'HandleVisibility','off');
+patch_x_ir.FaceVertexAlphaData = [pct_max_sharpness(in_window,global_cols(7)).^scale_power;flip(pct_max_sharpness(in_window,global_cols(7)).^scale_power)];   
+patch_x_ir.FaceAlpha = 'interp' ; 
+patch_x_ir.EdgeAlpha = 0 ;
+hold on
+
+
+
+% plot the spline and the scatter points
+plot(xx,yy_global, 'k','DisplayName','Spline fit')
+hold on
+scatter(wavelengths,global_sharpest,40,[0.8,0.8,0.8],'filled','DisplayName','Sharpest image points')
+xlabel('wavelength');
+ylabel('relative focal distance [\mum]')
+axis tight
+legend
+ylim([-400,300])

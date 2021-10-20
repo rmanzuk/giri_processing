@@ -23,14 +23,20 @@ function [im_MSE] = best_blur(sharp_im,blurred_im,sigma,net)
 %
 % Ryan A. Manzuk 01/28/2021
 %%
+    % denoise the image with the convNet and use the difference to estimate
+    % overall noise variance.
     denoised_sharp = denoiseImage(sharp_im,net);
     noise = sharp_im - denoised_sharp;
     noise_var = var(noise(:));
-
+     
+    % need to iterate over each blur kernel
     im_MSE = zeros(1,length(sigma));
     for i = 1:length(sigma)
+        % simulate the blur
         simulated_blur = imgaussfilt(denoised_sharp,sigma(i));
+        % add back in the image noise
         simulated_blur_noisy = imnoise(simulated_blur,'gaussian',0,noise_var);
+        % calculate MSE
         im_MSE(i) = (sum((simulated_blur_noisy - blurred_im).^2,'all'))/numel(blurred_im);
     end
 end
