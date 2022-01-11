@@ -1,9 +1,11 @@
-% script to run through functions and get data from the distortion target
+% script to run through functions and get data from the distortion target,
+% specifically checking if there is a distortion field when switching
+% between wavelengths.
 %
 % R. A. Manzuk 01/07/2021
 %% load everything
 
-focus_im = imread('/Users/rmanzuk/Desktop/achromatic_project/test_images/530p_green_focus_target6016_1.tif');
+focus_im = imread('/Users/ryan/Dropbox (Princeton)/achromatic_project/petro_scale_photos/Image0000.tif');
 %focus_im = rgb2gray(focus_im);
 focus_im = im2double(focus_im);
 
@@ -15,7 +17,7 @@ blur_im = im2double(blur_im);
 % for nonmaximum suppression
 local_thresh = 3;
 % size of the blobs
-rad = 16;
+rad = 50;
 % how strong of a response defines a blob
 global_thresh = 0.05;
 
@@ -30,7 +32,7 @@ all_distances = pdist2(focus_blobs_xy,blur_blobs_xy);
 clear all_distances
 matched_focus_blobs = focus_blobs_xy(closest_ind',:);
 
-%%
+%% make into a vector field
 distortion_vectors = [blur_blobs_xy(:,1)-matched_focus_blobs(:,1),blur_blobs_xy(:,2)-matched_focus_blobs(:,2)];
 vector_magnitudes = sqrt((distortion_vectors(:,1).^2) + (distortion_vectors(:,2).^2));
 okay_ind = vector_magnitudes <50;
