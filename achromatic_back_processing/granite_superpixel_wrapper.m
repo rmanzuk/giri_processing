@@ -1,4 +1,4 @@
-git % Script to do superpixel oversegmentation of granite images and segment
+% Script to do superpixel oversegmentation of granite images and segment
 % based upon those superpixels. Not effective, but could be used for other
 % images
 %
