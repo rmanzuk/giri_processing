@@ -1,4 +1,6 @@
-% script to make the figure representing scale of different technologies
+% script to make the figure representing scale of different technologies.
+% Not used in final paper
+
 %
 % R. A. Manzuk 07/16/2021
 %% list the technologies, their min/max resolution, min/max fov, 

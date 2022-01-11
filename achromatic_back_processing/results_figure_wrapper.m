@@ -1,5 +1,5 @@
-% wrapper to run a pca on multispectral vs RGB images and see about
-% contrast increase
+% Runs analyses on several mud stones from an Ardmore plate. Okay result,
+% not used in the final paper.
 %
 % R. A. Manzuk 03/25/2021
 %% load everything
