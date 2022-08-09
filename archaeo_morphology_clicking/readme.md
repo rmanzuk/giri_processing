@@ -1,4 +1,4 @@
-# Readme for Manzuk et al. submission to Nature
+# Readme for Manzuk et al., 2022 (Geobiology)
 
 Codes are organized several scripts that call on a set of functions to perform measurements and analyses. Workflow is as follows (more details with comments of scripts and functions):
 
